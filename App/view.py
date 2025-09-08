@@ -1,5 +1,5 @@
 import sys
-
+import tabulate as tb
 
 def new_logic():
     """
