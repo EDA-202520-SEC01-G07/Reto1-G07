@@ -1,6 +1,6 @@
 import sys
 import tabulate as tb
-import sys
+import App.logic as logic
 
 default_limit = 1000
 sys.setrecursionlimit(default_limit*10) 
@@ -10,7 +10,8 @@ def new_logic():
         Se crea una instancia del controlador
     """
     #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    control = logic.new_logic()
+    return control    
 
 def print_menu():
     print("Bienvenido")
@@ -30,7 +31,12 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    pass
+    tiempo = logic.get_time()
+     total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos = logic.load_data()
+    return "Tiempo de carga: "+tiempo+". \n Total de trayectos: "+total+". \n Datos del trayecto con menor \
+        distancia:\t Fecha: "+fecha_menor+"\t Costo: "+costo_menor+"\n Datos del trayecto con mayor distancia\t \
+        Fecha: "+fecha_mayor+"\tCosto: "+costo_mayor+"\n Los primeros 5 viajes fueron: "+primeros+"\n Los últimos \
+        5 viajes fueron: "+ultimos
 
 
 def print_data(control, id):
@@ -38,7 +44,8 @@ def print_data(control, id):
         Función que imprime un dato dado su ID
     """
     #TODO: Realizar la función para imprimir un elemento
-    pass
+    dato = logic.get_data()
+    print dato
 
 def print_req_1(control):
     """
