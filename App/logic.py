@@ -77,7 +77,11 @@ def load_data(catalog, filename):
         hor_fin= fech_fin[11:]
         x_fin= hor_fin.split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
+    if Dura_fin >= Dura_ini:  
         Dura= Dura_fin - Dura_ini
+    else:  
+        # asumimos que solo pasa al día siguiente
+        Dura= (1440 - Dura_ini) + Dura_fin
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
@@ -98,7 +102,12 @@ def load_data(catalog, filename):
         hor_fin= fech_fin[11:]
         x_fin= hor_fin.split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        Dura= Dura_fin - Dura_ini
+        if Dura_fin >= Dura_ini:  
+            Dura= Dura_fin - Dura_ini
+        else:  
+            # asumimos que solo pasa al día siguiente
+            Dura= (1440 - Dura_ini) + Dura_fin
+        viaje = lt.get_element(catalog["viajes"], i)
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
