@@ -33,11 +33,11 @@ def load_data(control):
     #TODO: Realizar la carga de datos
     filename = input('Diga el archivo que quiere evaluar (small, medium, large)\n')
     filename = "data/taxis-"+filename+".csv"
-    tiempo, total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos = logic.load_data(control, filename)
+    tiempo, total, menorid, fecha_menor, costo_menor, mayorid, fecha_mayor, costo_mayor, primeros, ultimos = logic.load_data(control, filename)
     print("\nTiempo de carga: "+str(tiempo)+" [ms].\
         \nTotal de trayectos: "+str(total)+" trayectos.\
-        \nDatos del trayecto con menor distancia:  \t Fecha: "+str(fecha_menor)+"\tCosto: "+str(costo_menor)+"\n\
-        \nDatos del trayecto con mayor distancia:  \t Fecha: "+str(fecha_mayor)+"\tCosto: "+str(costo_mayor)+"\n\
+        \nEl trayecto con menor distancia es el "+str(menorid)+":  \t Fecha: "+str(fecha_menor)+"\tCosto: "+str(costo_menor)+"\n\
+        \nEl trayecto con mayor distancia es el "+str(mayorid)+":  \t Fecha: "+str(fecha_mayor)+"\tCosto: "+str(costo_mayor)+"\n\
         \nLos primeros 5 viajes fueron:\n"+ tb.tabulate(primeros, headers="keys") +"\n\nLos últimos 5 viajes fueron: \n"+ tb.tabulate(ultimos, headers="keys")+"\n")
 
 

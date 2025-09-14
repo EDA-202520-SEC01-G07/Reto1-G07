@@ -55,11 +55,13 @@ def load_data(catalog, filename):
         viaje = lt.get_element(catalog["viajes"], i)
             #calcula el viaje con menor distancia y el mayor
         if viaje["trip_distance"] < menor and viaje["trip_distance"] > 0.0:
+            menorid = viaje["id"]
             menor = viaje["trip_distance"]
             fecha_menor = viaje["pickup_datetime"]
             costo_menor = viaje["total_amount"]
             
         if viaje["trip_distance"] > mayor:
+            mayorid = viaje["id"]
             mayor = viaje["trip_distance"]
             fecha_mayor = viaje["pickup_datetime"]
             costo_mayor = viaje["total_amount"]
@@ -68,6 +70,7 @@ def load_data(catalog, filename):
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
+            "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
             "Duración": None,  #####!!!!#####
@@ -79,6 +82,7 @@ def load_data(catalog, filename):
     for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
+            "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
             "Duración": None,
@@ -86,7 +90,7 @@ def load_data(catalog, filename):
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
         
-    return tiempo, total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos
+    return tiempo, total, menorid, fecha_menor, costo_menor, mayorid, fecha_mayor, costo_mayor, primeros, ultimos
 
 
 # Funciones de consulta sobre el catálogo
