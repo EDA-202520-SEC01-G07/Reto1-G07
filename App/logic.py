@@ -116,7 +116,6 @@ def load_data(catalog, filename):
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
-        
     return tiempo, total, menorid, fecha_menor, costo_menor, mayorid, fecha_mayor, costo_mayor, primeros, ultimos
 
 
