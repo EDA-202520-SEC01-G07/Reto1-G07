@@ -9,7 +9,7 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos
-    catalog = {"viajes" = None}
+    catalog = {"viajes": None}
     catalog["viajes"] = lt.new_list()
     return catalog
 
@@ -26,6 +26,7 @@ def load_data(catalog, filename):
     
     taxis = data_dir + filename
     input_file = csv.DictReader(open(taxis, encoding='utf-8'))
+    
     for viaje in input_file:
         viaje["id"]=id #El dictreader me da cada fila como un dict, 
                        #pongo una llave id para que sea fácil identificar cada viaje
@@ -48,38 +49,35 @@ def load_data(catalog, filename):
         
         #calcula el viaje con menor distancia y el mayor
         if viaje["trip_distance"] < menor and viaje["trip_distance"] > 0.0:
-            menor = viaje["id"]
+            menor = viaje["trip_distance"]
             fecha_menor = viaje["pickup_datetime"]
             costo_menor = viaje["total_amount"]
-        elif viaje["trip_distance"] > mayor:
+            
+        if viaje["trip_distance"] > mayor:
             mayor = viaje["trip_distance"]
             fecha_mayor = viaje["pickup_datetime"]
             costo_mayor = viaje["total_amount"]
     
     total = lt.size(catalog["viajes"])
     primeros = []
-    for i in range (0,6):
+    for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
-            "Fecha/Hora inicio" = catalog["viaje"]["pickup_datetime"]
-            "Fecha/Hora destino" = catalog["viaje"]["dropoff_datetime"]
-            "Duración" = None  #####!!!!#####
-            "Costo_total" = catalog["viaje"]["total_amount"]
-        }
+            "Fecha/Hora inicio": viaje["pickup_datetime"],
+            "Fecha/Hora destino": viaje["dropoff_datetime"],
+            "Duración": None  #####!!!!#####,
+            "Costo_total": viaje["total_amount"]}
         lt.add_last(primeros, info)
     
     ultimos = []
-
-    for i in range (total-4, total+1):
+    for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
-            "Fecha/Hora inicio" = catalog["viaje"]["pickup_datetime"]
-            "Fecha/Hora destino" = catalog["viaje"]["dropoff_datetime"]
-            "Duración" = None  #####!!!!#####
-            "Costo_total" = catalog["viaje"]["total_amount"]
-        }
+            "Fecha/Hora inicio": viaje["pickup_datetime"],
+            "Fecha/Hora destino": viaje["dropoff_datetime"],
+            "Duración": None  #####!!!!#####,
+            "Costo_total": viaje["total_amount"]}
         lt.add_last(ultimos, info)
-    
         
     return total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos
 
