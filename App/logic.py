@@ -155,7 +155,7 @@ def req_1(catalog, pasajeros):
     fechas = []
     frecuencias_fechas = []
     
-    tam = lt.size(catalog)
+    tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
         fech_ini= str(viaje["pickup_datetime"])
@@ -166,7 +166,11 @@ def req_1(catalog, pasajeros):
         hor_fin= fech_fin[11:]
         x_fin= hor_fin.split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        Dura= Dura_fin - Dura_ini
+        if Dura_fin >= Dura_ini:  
+            Dura= Dura_fin - Dura_ini
+        else:  
+            # asumimos que solo pasa al día siguiente
+            Dura= (1440 - Dura_ini) + Dura_fin
         
         if viaje["passenger_count"] == int(pasajeros):
             trayectos += 1
@@ -212,16 +216,16 @@ def req_1(catalog, pasajeros):
         mayor = tipo_pago["UNKNOWN"]
         pago_mayor = "UNKNOWN"
     
-    pago_mas_usado = pago_mayor + str(mayor)
+    pago_mas_usado = pago_mayor +" - "+str(mayor)
     
     # Encontrar el día más frecuente
-    fracuencia = max(frecuencias_fechas)
-    f = frecuencias_fechas.index(fracuencia)
+    frecuencia = max(frecuencias_fechas)
+    f = frecuencias_fechas.index(frecuencia)
     fecha_repetida = fechas[f]
     
     end = get_time()  
     tiempo = delta_time(start, end)
-    return tiempo, trayectos, duracion_prom, costo_prom, distancia_prom, peajes_prom, pago_mas_usado, propina_prom, fecha_repetida
+    return tiempo, trayectos, duracion_prom, costo_prom, distancia_prom, peajes_prom, pago_mas_usado, propina_prom, fecha_repetida, frecuencia
 
 
 def req_2(catalog):
