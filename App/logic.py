@@ -110,14 +110,40 @@ def get_data(catalog, id):
         return None
 
 
-def req_1(catalog):
+def req_1(catalog, pasajeros):
     """
-    Retorna el resultado del requerimiento 1
+    Retorna el resultado del requerimiento 1 - Juliana Rodríguez
     Calcular la información promedio de los trayectos dado una 
     cantidad de pasajeros.
     """
     # TODO: Modificar el requerimiento 1
-    pass
+    start = get_time()
+    trayectos = 0
+    duracion = 0 
+    costo_total = 0
+    distancia = 0
+    peajes = 0
+    propina = 0
+    tam = lt.size(catalog)
+    for i in range(0,tam):
+        viaje = lt.get_element(catalog["viajes"],i)
+        if viaje["passenger_count"] == int(pasajeros):
+            trayectos += 1
+            duracion += 1  ####!!!!####
+            costo_total += viaje["total_amount"]
+            distancia += viaje["trip_distance"]
+            peajes += viaje["tolls_amount"]
+            propina += viaje["tip_amount"]
+
+    duracion_prom = duracion/trayectos
+    costo_total_prom = costo_total/trayectos
+    distancia_prom = distancia/trayectos
+    peajes_prom = peajes/trayectos
+    propina_prom = propina/trayectos
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, trayectos, duracion_prom, costo_total_prom, distancia_prom, peajes_prom, propina_prom
 
 
 def req_2(catalog):
