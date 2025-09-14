@@ -69,23 +69,41 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
+        fech_ini= str (viaje["pickup_datetime"])
+        fech_fin= str (viaje["dropoff_datetime"])
+        hor_ini= fech_ini[11:]
+        x_ini= hor_ini.split(":")
+        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
+        hor_fin= fech_fin[11:]
+        x_fin= hor_fin.split(":")
+        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
+        Dura= Dura_fin - Dura_ini
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración": None,  #####!!!!#####
+            "Duración en (m)": Dura,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         primeros.append(info)
     
     ultimos = []
     for i in range (total-5, total):
+        fech_ini= str (viaje["pickup_datetime"])
+        fech_fin= str (viaje["dropoff_datetime"])
+        hor_ini= fech_ini[11:]
+        x_ini= hor_ini.split(":")
+        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
+        hor_fin= fech_fin[11:]
+        x_fin= hor_fin.split(":")
+        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
+        Dura= Dura_fin - Dura_ini
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración": None,
+            "Duración en (m)": Dura,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
