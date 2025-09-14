@@ -69,19 +69,19 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str (viaje["pickup_datetime"])
-        fech_fin= str (viaje["dropoff_datetime"])
+        fech_ini= str(viaje["pickup_datetime"])
+        fech_fin= str(viaje["dropoff_datetime"])
         hor_ini= fech_ini[11:]
         x_ini= hor_ini.split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
         hor_fin= fech_fin[11:]
         x_fin= hor_fin.split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-    if Dura_fin >= Dura_ini:  
-        Dura= Dura_fin - Dura_ini
-    else:  
-        # asumimos que solo pasa al día siguiente
-        Dura= (1440 - Dura_ini) + Dura_fin
+        if Dura_fin >= Dura_ini:  
+            Dura= Dura_fin - Dura_ini
+        else:  
+            # asumimos que solo pasa al día siguiente
+            Dura= (1440 - Dura_ini) + Dura_fin
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
