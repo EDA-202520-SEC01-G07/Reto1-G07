@@ -20,11 +20,9 @@ def load_data(catalog, filename):
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    id = 0
-    menor = 1000000000
-    mayor = 0.0
-    
-    taxis = data_dir + filename
+    id = 0    
+    start = get_time()
+    taxis = filename
     input_file = csv.DictReader(open(taxis, encoding='utf-8'))
     
     for viaje in input_file:
@@ -45,9 +43,17 @@ def load_data(catalog, filename):
         viaje["improvement_surcharge"] = float(viaje["improvement_surcharge"])
         viaje["total_amount"] = float(viaje["total_amount"])
 
-        lt.add_last(catalog["viajes"], viaje)
-        
-        #calcula el viaje con menor distancia y el mayor
+        lt.add_last(catalog["viajes"], viaje)   
+        id += 1
+    end = get_time()
+    tiempo = delta_time(start, end)
+    
+    total = lt.size(catalog["viajes"])
+    menor = 1000000000
+    mayor = 0.0
+    for i in range(0, total):
+        viaje = lt.get_element(catalog["viajes"], i)
+            #calcula el viaje con menor distancia y el mayor
         if viaje["trip_distance"] < menor and viaje["trip_distance"] > 0.0:
             menor = viaje["trip_distance"]
             fecha_menor = viaje["pickup_datetime"]
@@ -58,16 +64,16 @@ def load_data(catalog, filename):
             fecha_mayor = viaje["pickup_datetime"]
             costo_mayor = viaje["total_amount"]
     
-    total = lt.size(catalog["viajes"])
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración": None  #####!!!!#####,
+            "Duración": None,  #####!!!!#####
+            "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
-        lt.add_last(primeros, info)
+        primeros.append(info)
     
     ultimos = []
     for i in range (total-5, total):
@@ -75,11 +81,12 @@ def load_data(catalog, filename):
         info = {
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración": None  #####!!!!#####,
+            "Duración": None,
+            "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
-        lt.add_last(ultimos, info)
+        ultimos.append(info)
         
-    return total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos
+    return tiempo, total, fecha_menor, costo_menor, fecha_mayor, costo_mayor, primeros, ultimos
 
 
 # Funciones de consulta sobre el catálogo
@@ -102,6 +109,8 @@ def get_data(catalog, id):
 def req_1(catalog):
     """
     Retorna el resultado del requerimiento 1
+    Calcular la información promedio de los trayectos dado una 
+    cantidad de pasajeros.
     """
     # TODO: Modificar el requerimiento 1
     pass
