@@ -389,86 +389,12 @@ def load_data_neigh():
         lt.add_last(barrios, barrio)   
     return barrios
 
-# Función auxiliar para encontrar el barrio más cercano a unas coordenadas
-def nearest_neighborhood(lat, lon, neighborhoods):
-    mejor_nombre = ""
-    mejor_dist = 999999999  # número grande
-
-    for barrio in neighborhoods:
-        nombre = barrio[0]
-        nlat = barrio[1]
-        nlon = barrio[2]
-        d = haversine(lat, lon, nlat, nlon)
-
-        if d < mejor_dist:
-            mejor_dist = d
-            mejor_nombre = nombre
-
-    return mejor_nombre
-
-# -------------------------
-# REQ 4
-# -------------------------
-def req_4(trips, neighborhoods, fecha_inicial, fecha_final, criterio):
-    # Lista de combinaciones: [origen, destino, suma_total, cantidad]
-    combos = []
-
-    # recorrer viajes
-    for trip in trips:
-        # tomar solo la fecha (YYYY-MM-DD)
-        pickup_fecha = trip["pickup_datetime"][:10]
-
-        # filtrar rango de fechas
-        if pickup_fecha >= fecha_inicial and pickup_fecha <= fecha_final:
-            lat_o = float(trip["pickup_latitude"])
-            lon_o = float(trip["pickup_longitude"])
-            lat_d = float(trip["dropoff_latitude"])
-            lon_d = float(trip["dropoff_longitude"])
-            total = float(trip["total_amount"])
-
-            origen = nearest_neighborhood(lat_o, lon_o, neighborhoods)
-            destino = nearest_neighborhood(lat_d, lon_d, neighborhoods)
-
-            # solo si son barrios distintos
-            if origen != "" and destino != "" and origen != destino:
-                # buscar si ya existe combinación
-                pos = -1
-                for i in range(len(combos)):
-                    if combos[i][0] == origen and combos[i][1] == destino:
-                        pos = i
-
-                if pos == -1:
-                    # no existe → crear
-                    combos.append([origen, destino, total, 1])
-                else:
-                    # ya existe → actualizar
-                    combos[pos][2] = combos[pos][2] + total
-                    combos[pos][3] = combos[pos][3] + 1
-
-    # buscar mejor combinación
-    if len(combos) == 0:
-        return None
-
-    mejor = combos[0]
-    mejor_prom = mejor[2] / mejor[3]
-
-    for i in range(1, len(combos)):
-        prom = combos[i][2] / combos[i][3]
-        if criterio == "mayor":
-            if prom > mejor_prom:
-                mejor = combos[i]
-                mejor_prom = prom
-        else:  # menor
-            if prom < mejor_prom:
-                mejor = combos[i]
-                mejor_prom = prom
-
-    return {
-        "origen": mejor[0],
-        "destino": mejor[1],
-        "costo_promedio": round(mejor_prom, 2),
-        "num_trayectos": mejor[3]
-    }
+def req_4(catalog):
+    """
+    Retorna el resultado del requerimiento 4
+    """
+    # TODO: Modificar el requerimiento 4
+    pass
 
 
 
