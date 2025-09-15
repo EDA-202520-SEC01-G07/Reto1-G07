@@ -382,7 +382,7 @@ def req_3(catalog, maximo, minimo):
     return round(tiempo,2), trayectos, round(duracion_prom,2), round(costo_prom,2), round(distancia_prom,2), round(peajes_prom,2), max_cpasajeros, round(propina_prom,4), fecha_frec
               
 #Función auxiliar apara cargar datos del nyc-neighborhoods.csv
-def load_data_neigh()            
+def load_data_neigh():       
     barrios = lt.new_list()
     input_file = csv.DictReader(open("data/nyc-neighborhoods.csv", encoding='utf-8'))
     for barrio in input_file:
