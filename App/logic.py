@@ -172,12 +172,84 @@ def req_1(catalog, pasajeros):
     return tiempo, trayectos, duracion_prom, costo_total_prom, distancia_prom, peajes_prom, propina_prom
 
 
-def req_2(catalog):
-    """
-    Retorna el resultado del requerimiento 2
-    """
-    # TODO: Modificar el requerimiento 2
-    pass
+def req_2(catalog, pago):
+    start = get_time()
+    total = lt.size(catalog["viajes"])
+    contador = 0
+    Duracion = 0
+    filtro = []
+    costo_total = 0
+    distancia_total = 0
+    peajes_total = 0
+    pasajeros = {}
+    pasa = 0
+    cantidad = 0
+    propina = 0
+    fecha = {}
+    fech = 0
+    
+    for i in range(0, total):
+        viaje = lt.get_element(catalog["viajes"], i)
+        if viaje["payment_type"] == pago:
+            contador += 1
+            filtro.append(viaje)
+    
+    for viaje in filtro:
+        fech_ini = str(viaje["pickup_datetime"])
+        fech_fin = str(viaje["dropoff_datetime"])
+
+        hor_ini = fech_ini[11:]
+        x_ini = hor_ini.split(":")
+        Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
+
+        hor_fin = fech_fin[11:]
+        x_fin = hor_fin.split(":")
+        Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
+
+        if Dura_fin >= Dura_ini:
+            Dura = Dura_fin - Dura_ini
+        else:
+            Dura = (1440 - Dura_ini) + Dura_fin
+
+        Duracion += Dura
+        costo_total += viaje["total_amount"]
+        distancia_total += viaje["trip_distance"]
+        peajes_total += viaje["tolls_amount"]
+        propina += viaje["tip_amount"]
+
+        if viaje["passenger_count"] in pasajeros:
+            pasajeros[viaje["passenger_count"]] += 1
+        else:
+            pasajeros[viaje["passenger_count"]] = 1
+
+        fecha_fin = viaje["dropoff_datetime"][:10]
+        if fecha_fin in fecha:
+            fecha[fecha_fin] += 1
+        else:
+            fecha[fecha_fin] = 1
+    
+    for key in pasajeros:
+        if pasajeros[key] > pasa:
+            pasa = pasajeros[key]
+            cantidad = key
+    
+    fecha_mas_frec = None
+    for key in fecha:
+        if fecha[key] > fech:
+            fech = fecha[key]
+            fecha_mas_frec = key
+    
+    duracion = Duracion / contador
+    costo = costo_total / contador
+    distancia_total = distancia_total / contador
+    peajes_total = peajes_total / contador
+    propina = propina / contador
+    cantidad_pasa = str(cantidad) + "-" + str(pasa)
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    
+    return round(tiempo,2), contador, round(duracion,2), round(costo,2), round(distancia_total,2), round(peajes_total,2), cantidad_pasa, round(propina,4), fecha_mas_frec
 
 
 def req_3(catalog):

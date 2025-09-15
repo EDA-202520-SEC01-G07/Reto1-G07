@@ -62,9 +62,24 @@ def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 2
-    return None
+    pago = input("Indique el tipo de pago que desea consultar (CREDIT_CARD, CASH, NO_CHARGE, UNKNOWN): ")
+    tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_2(control, pago)
 
+    data = [
+        ["Tiempo de consulta [ms]", str(tiempo)],
+        ["Total de trayectos con tipo de pago " + str(pago), str(contador)],
+        ["Duración promedio de los viajes [min]", str(duracion)],
+        ["Costo promedio de los viajes [USD]", str(costo)],
+        ["Distancia promedio de los viajes [millas]", str(distancia_total)],
+        ["Peajes promedio de los viajes [USD]", str(peajes_total)],
+        ["Cantidad de pasajeros más frecuente “#número de pasajeros – cantidad”", str(cantidad_pasa)],
+        ["Propina promedio [USD]", str(propina)],
+        ["Fecha de finalización de trayecto con mayor frecuencia ", str(fecha_mayor)]
+    ]
+
+    print("\n=== Resultados del Requerimiento 2 ===")
+    print(tb.tabulate(data, headers=["Descripción", "Valor"]))
+    print("=======================================\n")
 
 def print_req_3(control):
     """
