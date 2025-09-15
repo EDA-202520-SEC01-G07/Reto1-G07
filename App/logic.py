@@ -321,7 +321,7 @@ def req_3(catalog, maximo, minimo):
     
     for i in range(0,tamano):
         viaje=lt.get_element(catalog["viajes"],i)
-        if viaje["total_amount"]>=minimo and viaje["total_amount"]<=maximo:
+        if viaje["total_amount"]>=float(minimo) and viaje["total_amount"]<=float(maximo):
             trayectos+=1
             fech_ini= str(viaje["pickup_datetime"])
             fech_fin= str(viaje["dropoff_datetime"])
@@ -411,21 +411,6 @@ def req_6(catalog):
     # TODO: Modificar el requerimiento 6
     pass
 
-
-def req_7(catalog):
-    """
-    Retorna el resultado del requerimiento 7
-    """
-    # TODO: Modificar el requerimiento 7
-    pass
-
-
-def req_8(catalog):
-    """
-    Retorna el resultado del requerimiento 8
-    """
-    # TODO: Modificar el requerimiento 8
-    pass
 
 
 # Funciones para medir tiempos de ejecucion

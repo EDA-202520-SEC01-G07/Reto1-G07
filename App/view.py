@@ -22,8 +22,6 @@ def print_menu():
     print("5- Ejecutar Requerimiento 4")
     print("6- Ejecutar Requerimiento 5")
     print("7- Ejecutar Requerimiento 6")
-    print("8- Ejecutar Requerimiento 7")
-    print("9- Ejecutar Requerimiento 8 (Bono)")
     print("0- Salir")
 
 def load_data(control):
@@ -96,7 +94,7 @@ def print_req_3(control):
     """
     menor= input("Indique el valor menor del precio total pagado: ")
     mayor= input("Indique el valor mayor del precio total pagado: ")
-    tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_3(control, menor, mayor)  
+    tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_3(control, mayor, menor)  
     print("\nTiempo de ejecución: "+str(tiempo)+" [ms].\
         \nCantidad de trayectos con precio total pagado entre "+str(menor)+" y "+str(mayor)+": "+str(contador)+"\
         \nEstadísitcas:\n\t- Duración promedio [min] de los trayectos: "+str(duracion)+"\
@@ -133,21 +131,6 @@ def print_req_6(control):
     return None
 
 
-def print_req_7(control):
-    """
-        Función que imprime la solución del Requerimiento 7 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 7
-    return None
-
-
-def print_req_8(control):
-    """
-        Función que imprime la solución del Requerimiento 8 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 8
-    return None
-
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -182,12 +165,6 @@ def main():
 
         elif int(inputs) == 7:
             print_req_6(control)
-
-        elif int(inputs) == 8:
-            print_req_7(control)
-
-        elif int(inputs) == 9:
-            print_req_8(control)
 
         elif int(inputs) == 0:
             working = False
