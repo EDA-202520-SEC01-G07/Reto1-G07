@@ -112,32 +112,7 @@ def print_req_4(control):
         Función que imprime la solución del Requerimiento 4 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 4
-    fecha_inicial = input("Ingrese la fecha inicial (YYYY-MM-DD): ")
-    fecha_final = input("Ingrese la fecha final (YYYY-MM-DD): ")
-    criterio = input("Ingrese el criterio (mayor / menor): ")
-
-    # aquí usamos el controlador para llamar a la lógica
-    resultado = control.req_4(fecha_inicial, fecha_final, criterio)
-
-    # mostrar resultados
-    if resultado is None:
-        print("No se encontraron viajes en el rango dado.")
-    else:
-        if criterio == "mayor":
-            print("La combinación de barrios con MAYOR costo promedio es:")
-        else:
-            print("La combinación de barrios con MENOR costo promedio es:")
-
-        tabla = [
-            ["Barrio origen",  resultado["origen"]],
-            ["Barrio destino", resultado["destino"]],
-            ["Costo promedio", resultado["costo_promedio"]],
-            ["Número de viajes", resultado["num_trayectos"]],
-        ]
-
-        print(tabulate(tabla, headers=["Campo", "Valor"], tablefmt="grid"))
-
-    print("===================================")
+    return None
 
 def print_req_5(control):
     """
