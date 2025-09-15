@@ -55,8 +55,17 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    return None
-
+    pas = input("Indique la cantidad de pasajeros: ")
+    tiempo, trayectos, duracion_prom, costo_prom, distancia_prom, peajes_prom, pago_mas_usado, propina_prom, fecha_repetida, frecuencia = logic.req_1(control, pas)
+    print("\nTiempo de ejecución: "+str(tiempo)+" [ms].\
+        \nCantidad de trayectos con "+str(pas)+" pasajeros: "+str(trayectos)+"\
+        \nEstadísitcas:\n\t- Duración promedio [min] de los trayectos: "+str(duracion_prom)+"\
+        \n\t- Costo promedio [dólares] de los trayectos: "+str(costo_prom)+"\
+        \n\t- Distancia promedio [millas] de los trayectos: "+str(distancia_prom)+"\
+        \n\t- Promedio costos de peajes: "+str(peajes_prom)+"\
+        \n\t- Tipo de pago más usado: "+str(pago_mas_usado)+"\
+        \n\t- Pago propina promedio de los trayectos: "+str(propina_prom)+"\
+        \n\t- La fecha con más trayectos es "+fecha_repetida+" donde hubo "+str(frecuencia)+" trayectos.")
 
 def print_req_2(control):
     """

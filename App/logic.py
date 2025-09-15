@@ -69,19 +69,19 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str (viaje["pickup_datetime"])
-        fech_fin= str (viaje["dropoff_datetime"])
+        fech_ini= str(viaje["pickup_datetime"])
+        fech_fin= str(viaje["dropoff_datetime"])
         hor_ini= fech_ini[11:]
         x_ini= hor_ini.split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
         hor_fin= fech_fin[11:]
         x_fin= hor_fin.split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-    if Dura_fin >= Dura_ini:  
-        Dura= Dura_fin - Dura_ini
-    else:  
-        # asumimos que solo pasa al día siguiente
-        Dura= (1440 - Dura_ini) + Dura_fin
+        if Dura_fin >= Dura_ini:  
+            Dura= Dura_fin - Dura_ini
+        else:  
+            # asumimos que solo pasa al día siguiente
+            Dura= (1440 - Dura_ini) + Dura_fin
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
@@ -93,8 +93,9 @@ def load_data(catalog, filename):
     
     ultimos = []
     for i in range (total-5, total):
-        fech_ini= str (viaje["pickup_datetime"])
-        fech_fin= str (viaje["dropoff_datetime"])
+        viaje = lt.get_element(catalog["viajes"], i)
+        fech_ini= str(viaje["pickup_datetime"])
+        fech_fin= str(viaje["dropoff_datetime"])
         hor_ini= fech_ini[11:]
         x_ini= hor_ini.split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
@@ -111,11 +112,10 @@ def load_data(catalog, filename):
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración en (m)": Dura,
+            "Duración en (min)": Dura,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
-        
     return tiempo, total, menorid, fecha_menor, costo_menor, mayorid, fecha_mayor, costo_mayor, primeros, ultimos
 
 
@@ -150,26 +150,81 @@ def req_1(catalog, pasajeros):
     distancia = 0
     peajes = 0
     propina = 0
-    tam = lt.size(catalog)
+    tipo_pago = {"CREDIT_CARD": 0, "CASH": 0, "NO_CHARGE": 0, "UNKNOWN": 0}
+    fechas = []
+    frecuencias_fechas = []
+    
+    tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
+        fech_ini= str(viaje["pickup_datetime"])
+        fech_fin= str(viaje["dropoff_datetime"])
+        hor_ini= fech_ini[11:]
+        x_ini= hor_ini.split(":")
+        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
+        hor_fin= fech_fin[11:]
+        x_fin= hor_fin.split(":")
+        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
+        if Dura_fin >= Dura_ini:  
+            Dura= Dura_fin - Dura_ini
+        else:  
+            # asumimos que solo pasa al día siguiente
+            Dura= (1440 - Dura_ini) + Dura_fin
+        
         if viaje["passenger_count"] == int(pasajeros):
             trayectos += 1
-            duracion += 1  ####!!!!####
+            duracion += Dura
             costo_total += viaje["total_amount"]
             distancia += viaje["trip_distance"]
             peajes += viaje["tolls_amount"]
             propina += viaje["tip_amount"]
+            
+            if viaje["payment_type"] == "CREDIT_CARD":
+                tipo_pago["CREDIT_CARD"]+=1          
+            elif viaje["payment_type"] == "CASH":
+                tipo_pago["CASH"]+=1
+            elif viaje["payment_type"] == "NO_CHARGE":
+                tipo_pago["NO_CHARGE"]+=1
+            elif viaje["payment_type"] == "UNKNOWN":
+                tipo_pago["UNKNOWN"]+=1
+                
+            fecha_i = str(viaje["pickup_datetime"])[:10]
+            if fecha_i not in fechas:
+                fechas.append(fecha_i)
+                frecuencias_fechas.append(1)
+            else:
+                ind = fechas.index(fecha_i)
+                frecuencias_fechas[ind] += 1
 
     duracion_prom = duracion/trayectos
-    costo_total_prom = costo_total/trayectos
+    costo_prom = costo_total/trayectos
     distancia_prom = distancia/trayectos
     peajes_prom = peajes/trayectos
     propina_prom = propina/trayectos
     
-    end = get_time()
+    # encontrar el pago más frecuente
+    pago_mayor = "CREDIT_CARD"
+    mayor = tipo_pago["CREDIT_CARD"]
+    if tipo_pago["CASH"] > mayor:
+        mayor = tipo_pago["CASH"]
+        pago_mayor = "CASH"
+    elif  tipo_pago["NO_CHARGE"]>mayor:
+        mayor = tipo_pago["NO_CHARGE"]
+        pago_mayor = "NO_CHARGE"
+    elif tipo_pago["UNKNOWN"]>mayor:
+        mayor = tipo_pago["UNKNOWN"]
+        pago_mayor = "UNKNOWN"
+    
+    pago_mas_usado = pago_mayor +" - "+str(mayor)
+    
+    # Encontrar el día más frecuente
+    frecuencia = max(frecuencias_fechas)
+    f = frecuencias_fechas.index(frecuencia)
+    fecha_repetida = fechas[f]
+    
+    end = get_time()  
     tiempo = delta_time(start, end)
-    return tiempo, trayectos, duracion_prom, costo_total_prom, distancia_prom, peajes_prom, propina_prom
+    return tiempo, trayectos, duracion_prom, costo_prom, distancia_prom, peajes_prom, pago_mas_usado, propina_prom, fecha_repetida, frecuencia
 
 
 def req_2(catalog, pago):
