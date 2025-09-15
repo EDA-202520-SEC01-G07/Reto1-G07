@@ -307,12 +307,81 @@ def req_2(catalog, pago):
     return round(tiempo,2), contador, round(duracion,2), round(costo,2), round(distancia_total,2), round(peajes_total,2), cantidad_pasa, round(propina,4), fecha_mas_frec
 
 
-def req_3(catalog):
-    """
-    Retorna el resultado del requerimiento 3
-    """
-    # TODO: Modificar el requerimiento 3
-    pass
+def req_3(catalog, maximo, minimo):
+    start=get_time()
+    tamano=lt.size(catalog["viajes"])
+    trayectos=0
+    duracion=0
+    costo=0
+    distancia=0
+    peajes=0
+    propina=0
+    frecuencias_pasa={}
+    frecuencias_fechas={}
+    
+    for i in range(0,tamano):
+        viaje=lt.get_element(catalog["viajes"],i)
+        if viaje["total_amount"]>=minimo and viaje["total_amount"]<=maximo:
+            trayectos+=1
+            fech_ini= str(viaje["pickup_datetime"])
+            fech_fin= str(viaje["dropoff_datetime"])
+            hor_ini= fech_ini[11:]
+            x_ini= hor_ini.split(":")
+            Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
+            hor_fin= fech_fin[11:]
+            x_fin= hor_fin.split(":")
+            Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
+            
+            if Dura_fin >= Dura_ini:  
+                Dura= Dura_fin - Dura_ini
+            else:  
+                Dura= (1440 - Dura_ini) + Dura_fin
+                
+            duracion+=Dura
+            costo+=viaje["total_amount"]
+            distancia+=viaje["trip_distance"]
+            peajes+=viaje["tolls_amount"]
+            propina+=viaje["tip_amount"]
+            
+              
+            if viaje["passenger_count"] in frecuencias_pasa:
+                frecuencias_pasa[viaje["passenger_count"]]+=1
+            else:
+                frecuencias_pasa[viaje["passenger_count"]]=1
+            
+            if fech_fin in frecuencias_fechas:
+                frecuencias_fechas[fech_fin]+=1
+            else:
+                frecuencias_fechas[fech_fin]=1
+            
+    duracion_prom=duracion/trayectos
+    costo_prom=costo/trayectos
+    distancia_prom=distancia/trayectos
+    peajes_prom=peajes/trayectos
+    propina_prom=propina/trayectos
+       
+    max_cantidad = 0
+    num_pasajeros = 0
+    for key in frecuencias_pasa:
+        if frecuencias_pasa[key] > max_cantidad:
+            max_cantidad = frecuencias_pasa[key]  
+            num_pasajeros = key              
+
+    max_cpasajeros = str(num_pasajeros) + " - " + str(max_cantidad)
+
+    max_fech = 0
+    fecha_frec = None
+    for key in frecuencias_fechas:
+        if frecuencias_fechas[key] > max_fech:
+            max_fech = frecuencias_fechas[key]
+            fecha_frec = key             
+        
+    end=get_time()
+    tiempo=delta_time(start,end)
+        
+    return round(tiempo,2), trayectos, round(duracion_prom,2), round(costo_prom,2), round(distancia_prom,2), round(peajes_prom,2), max_cpasajeros, round(propina_prom,4), fecha_frec
+              
+            
 
 
 def req_4(catalog):
