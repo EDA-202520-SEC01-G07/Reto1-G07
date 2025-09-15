@@ -94,7 +94,18 @@ def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 3
+    menor= input("Indique el valor menor del precio total pagado: ")
+    mayor= input("Indique el valor mayor del precio total pagado: ")
+    tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_3(control, menor, mayor)  
+    print("\nTiempo de ejecución: "+str(tiempo)+" [ms].\
+        \nCantidad de trayectos con precio total pagado entre "+str(menor)+" y "+str(mayor)+": "+str(contador)+"\
+        \nEstadísitcas:\n\t- Duración promedio [min] de los trayectos: "+str(duracion)+"\
+        \n\t- Costo promedio [dólares] de los trayectos: "+str(costo)+"\
+        \n\t- Distancia promedio [millas] de los trayectos: "+str(distancia_total)+"\
+        \n\t- Promedio costos de peajes: "+str(peajes_total)+"\
+        \n\t- Cantidad de pasajeros más frecuente “#número de pasajeros – cantidad”: "+str(cantidad_pasa)+"\
+        \n\t- Pago propina promedio de los trayectos: "+str(propina)+"\
+        \n\t- La fecha con más trayectos es "+fecha_mayor+".")
     return None
 
 

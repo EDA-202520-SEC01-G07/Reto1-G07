@@ -397,7 +397,7 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog):
+def req_5(catalog,costo_tipo, fecha_inicial, fecha_final):
     """
     Retorna el resultado del requerimiento 5
     """
