@@ -2,7 +2,7 @@ import time
 import csv
 csv.field_size_limit(2147483647)
 from DataStructures.List import array_list as lt
-
+import math
 
 def new_logic():
     """
@@ -443,3 +443,12 @@ def delta_time(start, end):
     """
     elapsed = float(end - start)
     return elapsed
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 3959  # Radio de la Tierra en millas
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    return R * c
