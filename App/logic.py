@@ -89,7 +89,7 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        duracion = tiempo(viaje)
+        duracion = diferencia_tiempo(viaje)
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
@@ -102,7 +102,7 @@ def load_data(catalog, filename):
     ultimos = []
     for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
-        duracion = tiempo(viaje)
+        duracion = diferencia_tiempo(viaje)
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
             "Id_trayecto": viaje["id"],
@@ -153,7 +153,7 @@ def req_1(catalog, pasajeros):
     tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
-        dur = tiempo(viaje)
+        dur = diferencia_tiempo(viaje)
         if viaje["passenger_count"] == int(pasajeros):
             trayectos += 1
             duracion += dur
@@ -233,7 +233,7 @@ def req_2(catalog, pago):
             filtro.append(viaje)
     
     for viaje in filtro:
-        dur = tiempo(viaje)
+        dur = diferencia_tiempo(viaje)
         Duracion += dur
         costo_total += viaje["total_amount"]
         distancia_total += viaje["trip_distance"]
@@ -291,7 +291,7 @@ def req_3(catalog, maximo, minimo):
         viaje=lt.get_element(catalog["viajes"],i)
         if viaje["total_amount"]>=float(minimo) and viaje["total_amount"]<=float(maximo):
             trayectos+=1
-            dura = tiempo(viaje)
+            dura = diferencia_tiempo(viaje)
             duracion+=dura
             costo+=viaje["total_amount"]
             distancia+=viaje["trip_distance"]
@@ -433,9 +433,8 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
         dropoff_time=dropoff_times.replace(":","")
         viaje= lt.get_element(catalog["viajes"], i)
         if viaje["pickup_datetime"] >= fecha_menor and viaje["pickup_datetime"] <= fecha_mayor:
-            
-            
-    pass
+            x = None
+    return x
 
 def req_6(catalog, barrio, fecha_i, fecha_f):
     """
@@ -459,11 +458,10 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
             if barrio == barrio_salida:
                 trayectos += 1
                 distancia += viaje["trip_distance"]              
-                tiempo = tiempo(viaje)
+                tiempo = diferencia_tiempo(viaje)
 
-                f_latitud = viaje["dropoff_latitude"]
-                f_longitud = viaje["dropoff_longitude"]
-                barrio_destino = barrio_mas_cercano(catalog, f_latitud, f_longitud)
+                punto_f=(viaje["dropoff_latitude"],viaje["dropoff_longitude"])
+                barrio_destino = barrio_mas_cercano(catalog, punto_f)
                 if barrio_destino not in b_fin:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
@@ -509,7 +507,7 @@ def barrio_mas_cercano(catalog, punto1):
     barrios = catalog["barrios"]
     barrio_cercano = None
     distancia_min = 1000000000
-    for i in range(1, lt.size(barrios) + 1):
+    for i in range(0, lt.size(barrios) - 1):
         b = lt.get_element(barrios, i)
 
     for b in range(lt.size(barrios)):
@@ -521,7 +519,7 @@ def barrio_mas_cercano(catalog, punto1):
             barrio_cercano = b["neighborhood"]
     return barrio_cercano
 
-def tiempo(viaje):
+def diferencia_tiempo(viaje):
     #tiempo               
     x_ini= viaje["pickup_time"].split(":")
     Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
