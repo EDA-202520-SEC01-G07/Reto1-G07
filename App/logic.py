@@ -593,3 +593,17 @@ def barrio_mas_cercano(catalog, punto1):
             barrio_cercano = b["neighborhood"]   # o podrías devolver también borough
     
     return barrio_cercano
+
+# Función auxiliar para calcular la distancia entre dos puntos geográficos hechaq con ayuda de una IA.
+def haversine(lat1, lon1, lat2, lon2):
+    """
+    Calcula la distancia entre dos puntos (lat1, lon1) y (lat2, lon2)
+    """
+    R = 3956  # Radio de la Tierra en millas. Usa 6371 para kilómetros
+
+    dLat = math.radians(lat2 - lat1)
+    dLon = math.radians(lon2 - lon1)
+    a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) * math.sin(dLon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distancia = R * c
+    return distancia
