@@ -477,15 +477,6 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
         return {"mensaje": "No hay trayectos en ese rango de fechas"}
     
 
-def req_4(catalog):
-    """
-    Retorna el resultado del requerimiento 4
-    """
-    # TODO: Modificar el requerimiento 4
-    pass
-
-
-
 def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
     """
     Retorna el resultado del requerimiento 5
@@ -606,23 +597,3 @@ def barrio_mas_cercano(lat, lon):
             barrio_cercano = b["neighborhood"]   # o podrías devolver también borough
     
     return barrio_cercano
-# Función auxiliar para calcular la distancia entre dos puntos geográficos sacada con IA.
-def haversine(lat1, lon1, lat2, lon2):
-    """
-    Calcula la distancia en millas entre dos puntos (lat1, lon1) y (lat2, lon2)
-    usando la fórmula de Haversine.
-    """
-    R = 3958.8  # Radio de la Tierra en millas
-
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lon2 - lon1)
-
-    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distancia = R * c
-    return distancia
-
-
