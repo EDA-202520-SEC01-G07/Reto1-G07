@@ -583,7 +583,6 @@ def barrio_mas_cercano(lat, lon, barrios):
     distancia_min = 1000000000
     for i in range(1, lt.size(barrios) + 1):
         b = lt.get_element(barrios, i)
-
         d = haversine(lat, lon, b["latitude"], b["longitude"])
         if d < distancia_min:
             distancia_min = d
