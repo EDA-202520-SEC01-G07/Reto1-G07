@@ -480,15 +480,28 @@ def req_4(catalog):
     pass
 
 
-
-def req_5(catalog,costo_tipo, fecha_inicial, fecha_final):
+def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
     """
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
+    franjas=[]
+    costo=[]
+    costo_prom=[]
+    tamano= lt.size(catalog["viajes"])
+
+    for i in range(0, tamano):
+        pickup_times=(str(viaje["pickup_datetime"]))[11:]
+        dropoff_times=(str(viaje["dropoff_datetime"]))[11:]
+        pickup_time=pickup_times.replace(":","")
+        dropoff_time=dropoff_times.replace(":","")
+        viaje= lt.get_element(catalog["viajes"], i)
+        if viaje["pickup_datetime"] >= fecha_menor and viaje["pickup_datetime"] <= fecha_mayor:
+            
+            
     pass
 
-def req_6(catalog, barrio, fecha_i, fecha_f):
+def req_6(catalog):
     """
     Retorna el resultado del requerimiento 6
     """
@@ -566,28 +579,4 @@ def delta_time(start, end):
     elapsed = float(end - start)
     return elapsed
 
-def haversine(lat1, lon1, lat2, lon2):
-    R = 3959  # Radio de la Tierra en millas
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
-    c = 2 * math.asin(math.sqrt(a))
-    return R * c
 
-def barrio_mas_cercano(lat, lon):
-    """
-    barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
-    """
-    barrios = load_data_neigh()
-    barrio_cercano = None
-    distancia_min = 9999999999999999
-
-    for b in range(lt.size(barrios)):
-        b = lt.get_element(barrios, b)
-        d = haversine(lat, lon, b["latitude"], b["longitude"])
-        if d < distancia_min:
-            distancia_min = d
-            barrio_cercano = b["neighborhood"]
-
-    return barrio_cercano
