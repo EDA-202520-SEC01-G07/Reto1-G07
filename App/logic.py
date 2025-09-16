@@ -403,26 +403,100 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
     if mejor:
         return (tiempo, filtro, total_trayectos, mejor["origen"], mejor["destino"], mejor["distancia"] / mejor["conteo"], mejor["duracion"] / mejor["conteo"], mejor["costo"] / mejor["conteo"])
     else:
-        return (tiempo, filtro, 0, None, None, 0, 0, 0)
+        return {"mensaje": "No hay trayectos en ese rango de fechas"}
+    
 
-
-def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
+def req_5(catalog, filtro, fecha_menor, fecha_mayor):
     """
     Retorna el resultado del requerimiento 5
     """
-    # TODO: Modificar el requerimiento 5
-    franjas=[]
-    costo=[]
-    costo_prom=[]
-    tamano= lt.size(catalog["viajes"])
+    start = get_time()
+
+    franjas = lt.new_list()
+    for h in range(24):
+        lt.add_last(franjas, f"[{h} - {h+1})")  
+    sum_cost   = [0.0]*24
+    count_tr   = [0]*24
+    sum_durmin = [0.0]*24
+    sum_pax    = [0]*24
+    max_cost   = [float("-inf")]*24
+    max_drop   = [""]*24
+    min_cost   = [float("inf")]*24
+    min_drop   = [""]*24
+
+    viajes = catalog["viajes"]
+    tamano = lt.size(viajes)
+    trayectos_filtro = 0
 
     for i in range(0, tamano):
-        pickup_times=(str(viaje["pickup_time"]))
-        dropoff_times=(str(viaje["dropoff_time"]))
-        pickup_time=pickup_times.replace(":","")
-        dropoff_time=dropoff_times.replace(":","")
-        viaje= lt.get_element(catalog["viajes"], i)
-    pass
+        viaje = lt.get_element(viajes, i)
+        fecha_inicio_str = str(viaje["pickup_datetime"])[:10]
+        if fecha_inicio_str >= fecha_menor and fecha_inicio_str <= fecha_mayor:
+            trayectos_filtro += 1
+
+            fech_ini = str(viaje["pickup_datetime"])  
+            fech_fin = str(viaje["dropoff_datetime"])
+
+            hor_ini = fech_ini[11:]
+            x_ini = hor_ini.split(":")
+            hora_inicio = int(x_ini[0])
+            min_inicio  = int(x_ini[1])
+            dura_ini = hora_inicio * 60 + min_inicio
+
+            hor_fin = fech_fin[11:]
+            x_fin = hor_fin.split(":")
+            hora_fin = int(x_fin[0])
+            min_fin  = int(x_fin[1])
+            dura_fin = hora_fin * 60 + min_fin
+
+            if dura_fin >= dura_ini:
+                duracion_min = dura_fin - dura_ini
+            else:
+                duracion_min = (1440 - dura_ini) + dura_fin
+
+            hora = hora_inicio 
+
+            costo_viaje = float(viaje["total_amount"])
+            pasajeros   = int(viaje["passenger_count"])
+
+            sum_cost[hora]   += costo_viaje
+            count_tr[hora]   += 1
+            sum_durmin[hora] += duracion_min
+            sum_pax[hora]    += pasajeros
+
+            if (costo_viaje > max_cost[hora]) or (costo_viaje == max_cost[hora] and fech_fin > max_drop[hora]):
+                max_cost[hora] = costo_viaje
+                max_drop[hora] = fech_fin
+
+            if (costo_viaje < min_cost[hora]) or (costo_viaje == min_cost[hora] and fech_fin > min_drop[hora]):
+                min_cost[hora] = costo_viaje
+                min_drop[hora] = fech_fin
+
+    mejor_index = -1
+    mejor_prom_costo = None
+
+    for hora in range(24):
+        if count_tr[hora] == 0:
+            continue
+        promedio_costo = sum_cost[hora] / count_tr[hora]
+        if filtro == "MAYOR":
+            if mejor_index == -1 or promedio_costo > mejor_prom_costo:
+                mejor_index, mejor_prom_costo = hora, promedio_costo
+        else:  
+            if mejor_index == -1 or promedio_costo < mejor_prom_costo:
+                mejor_index, mejor_prom_costo = hora, promedio_costo
+
+    end = get_time()
+    tiempo_e = delta_time(start, end)
+    
+    if mejor_index == -1:
+        return ("no hay datos que cumplan con el filtro")
+    franja_str     = lt.get_element(franjas, mejor_index)
+    costo_promedio = sum_cost[mejor_index] / count_tr[mejor_index]
+    duracion_prom  = sum_durmin[mejor_index] / count_tr[mejor_index]
+    pasajeros_prom = sum_pax[mejor_index] / count_tr[mejor_index]
+
+    return (tiempo_e,filtro,trayectos_filtro,franja_str,costo_promedio,count_tr[mejor_index],duracion_prom,pasajeros_prom,max_cost[mejor_index],min_cost[mejor_index])
 
 def req_6(catalog, barrio, fecha_i, fecha_f):
     """
