@@ -434,27 +434,12 @@ def req_5(catalog, filtro, fecha_menor, fecha_mayor):
         if fecha_inicio_str >= fecha_menor and fecha_inicio_str <= fecha_mayor:
             trayectos_filtro += 1
 
-            fech_ini = str(viaje["pickup_datetime"])  
+            fech_ini = str(viaje["pickup_datetime"])
             fech_fin = str(viaje["dropoff_datetime"])
-
-            hor_ini = fech_ini[11:]
-            x_ini = hor_ini.split(":")
-            hora_inicio = int(x_ini[0])
-            min_inicio  = int(x_ini[1])
-            dura_ini = hora_inicio * 60 + min_inicio
-
-            hor_fin = fech_fin[11:]
-            x_fin = hor_fin.split(":")
-            hora_fin = int(x_fin[0])
-            min_fin  = int(x_fin[1])
-            dura_fin = hora_fin * 60 + min_fin
-
-            if dura_fin >= dura_ini:
-                duracion_min = dura_fin - dura_ini
-            else:
-                duracion_min = (1440 - dura_ini) + dura_fin
-
-            hora = hora_inicio 
+            viaje["pickup_time"]  = fech_ini[11:16]
+            viaje["dropoff_time"] = fech_fin[11:16]
+            duracion_min = diferencia_tiempo(viaje)
+            hora = int(viaje["pickup_time"][:2])
 
             costo_viaje = float(viaje["total_amount"])
             pasajeros   = int(viaje["passenger_count"])
@@ -491,12 +476,12 @@ def req_5(catalog, filtro, fecha_menor, fecha_mayor):
     
     if mejor_index == -1:
         return ("no hay datos que cumplan con el filtro")
-    franja_str     = lt.get_element(franjas, mejor_index)
+    franja     = lt.get_element(franjas, mejor_index)
     costo_promedio = sum_cost[mejor_index] / count_tr[mejor_index]
     duracion_prom  = sum_durmin[mejor_index] / count_tr[mejor_index]
     pasajeros_prom = sum_pax[mejor_index] / count_tr[mejor_index]
 
-    return (tiempo_e,filtro,trayectos_filtro,franja_str,costo_promedio,count_tr[mejor_index],duracion_prom,pasajeros_prom,max_cost[mejor_index],min_cost[mejor_index])
+    return (tiempo_e,filtro,trayectos_filtro,franja,costo_promedio,count_tr[mejor_index],duracion_prom,pasajeros_prom,max_cost[mejor_index],min_cost[mejor_index])
 
 def req_6(catalog, barrio, fecha_i, fecha_f):
     """
