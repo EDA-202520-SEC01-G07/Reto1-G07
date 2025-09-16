@@ -44,6 +44,10 @@ def load_data(catalog, filename):
     for viaje in input_file:
         viaje["id"]=id #El dictreader me da cada fila como un dict, 
                        #pongo una llave id para que sea fácil identificar cada viaje
+        viaje["pickup_date"]= viaje["pickup_datetime"][:10] #para obtener fácil la fecha inicio
+        viaje["pickup_time"]=viaje["pickup_datetime"][11:] #para obtener fácil la hora inicio
+        viaje["dropoff_date"]=viaje["dropoff_datetime"][:10] #para obtener fácil la fecha final
+        viaje["dropoff_time"]=viaje["dropoff_datetime"][11:] #para obtener fácil la hora final
         viaje["passenger_count"] = int(viaje["passenger_count"])
         viaje["trip_distance"] = float(viaje["trip_distance"])
         viaje["pickup_longitude"] = float(viaje["pickup_longitude"])
@@ -85,13 +89,9 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
+        x_ini= viaje["pickup_time"].split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
+        x_fin= viaje["dropoff_time"].split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
         if Dura_fin >= Dura_ini:  
             Dura= Dura_fin - Dura_ini
@@ -110,13 +110,9 @@ def load_data(catalog, filename):
     ultimos = []
     for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
+        x_ini= viaje["pickup_time"].split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
+        x_fin= viaje["dropoff_time"].split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
         if Dura_fin >= Dura_ini:  
             Dura= Dura_fin - Dura_ini
@@ -173,13 +169,9 @@ def req_1(catalog, pasajeros):
     tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
+        x_ini= viaje["pickup_time"].split(":")
         Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
+        x_fin= viaje["dropoff_time"].split(":")
         Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
         if Dura_fin >= Dura_ini:  
             Dura= Dura_fin - Dura_ini
@@ -204,7 +196,7 @@ def req_1(catalog, pasajeros):
             elif viaje["payment_type"] == "UNKNOWN":
                 tipo_pago["UNKNOWN"]+=1
                 
-            fecha_i = str(viaje["pickup_datetime"])[:10]
+            fecha_i = viaje["pickup_date"]
             if fecha_i not in fechas:
                 fechas.append(fecha_i)
                 frecuencias_fechas.append(1)
@@ -266,17 +258,11 @@ def req_2(catalog, pago):
             filtro.append(viaje)
     
     for viaje in filtro:
-        fech_ini = str(viaje["pickup_datetime"])
-        fech_fin = str(viaje["dropoff_datetime"])
-
-        hor_ini = fech_ini[11:]
-        x_ini = hor_ini.split(":")
+        x_ini= viaje["pickup_time"].split(":")
         Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
 
-        hor_fin = fech_fin[11:]
-        x_fin = hor_fin.split(":")
+        x_fin= viaje["dropoff_time"].split(":")
         Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
-
         if Dura_fin >= Dura_ini:
             Dura = Dura_fin - Dura_ini
         else:
@@ -339,13 +325,9 @@ def req_3(catalog, maximo, minimo):
         viaje=lt.get_element(catalog["viajes"],i)
         if viaje["total_amount"]>=float(minimo) and viaje["total_amount"]<=float(maximo):
             trayectos+=1
-            fech_ini= str(viaje["pickup_datetime"])
-            fech_fin= str(viaje["dropoff_datetime"])
-            hor_ini= fech_ini[11:]
-            x_ini= hor_ini.split(":")
+            x_ini= viaje["pickup_time"].split(":")
             Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-            hor_fin= fech_fin[11:]
-            x_fin= hor_fin.split(":")
+            x_fin= viaje["dropoff_time"].split(":")
             Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
             
             if Dura_fin >= Dura_ini:  
@@ -365,10 +347,10 @@ def req_3(catalog, maximo, minimo):
             else:
                 frecuencias_pasa[viaje["passenger_count"]]=1
             
-            if fech_fin in frecuencias_fechas:
-                frecuencias_fechas[fech_fin]+=1
+            if viaje["dropoff_date"] in frecuencias_fechas:
+                frecuencias_fechas["dropoff_date"]+=1
             else:
-                frecuencias_fechas[fech_fin]=1
+                frecuencias_fechas["dropoff_date"]=1
             
     duracion_prom=duracion/trayectos
     costo_prom=costo/trayectos
@@ -412,7 +394,7 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
 
     for i in range(0, tamaño):
         viaje = lt.get_element(viajes, i)   # ahora sí obtienes el diccionario
-        fecha = viaje["pickup_datetime"][:10]  # YYYY-MM-DD
+        fecha = viaje["pickup_date"]  # YYYY-MM-DD
 
 
 
@@ -489,8 +471,8 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
     tamano= lt.size(catalog["viajes"])
 
     for i in range(0, tamano):
-        pickup_times=(str(viaje["pickup_datetime"]))[11:]
-        dropoff_times=(str(viaje["dropoff_datetime"]))[11:]
+        pickup_times=(str(viaje["pickup_time"]))
+        dropoff_times=(str(viaje["dropoff_time"]))
         pickup_time=pickup_times.replace(":","")
         dropoff_time=dropoff_times.replace(":","")
         viaje= lt.get_element(catalog["viajes"], i)
@@ -514,7 +496,7 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
-        fecha = viaje["pickup_datetime"][:10]
+        fecha = viaje["pickup_date"]
         if fecha >= fecha_i and fecha <= fecha_f:
             punto1 = (viaje["pickup_latitude"], viaje["pickup_longitude"])
             barrio_salida = barrio_mas_cercano(catalog, punto1)
@@ -522,13 +504,9 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 trayectos += 1
                 distancia += viaje["trip_distance"]
                 #tiempo                
-                fech_ini = str(viaje["pickup_datetime"])
-                fech_fin = str(viaje["dropoff_datetime"])
-                hor_ini = fech_ini[11:]
-                x_ini = hor_ini.split(":")
+                x_ini= viaje["pickup_time"].split(":")
                 Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
-                hor_fin = fech_fin[11:]
-                x_fin = hor_fin.split(":")
+                x_fin= viaje["dropoff_time"].split(":")
                 Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
                 if Dura_fin >= Dura_ini:
                     Dura = Dura_fin - Dura_ini
