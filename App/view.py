@@ -142,8 +142,29 @@ def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 5
+    filtro = input("Digite filtro (MAYOR/MENOR): ").strip().upper()
+    fecha_ini = input("Digite fecha inicial (YYYY-MM-DD): ").strip()
+    fecha_fin = input("Digite fecha final (YYYY-MM-DD): ").strip()
+    
+    tiempo_ms, filtro_usado, total_trayectos_en_rango, franja, costo_promedio, num_trayectos_franja, duracion_promedio_min, pasajeros_promedio, costo_max_franja, costo_min_franja = logic.req_5(control, filtro, fecha_ini, fecha_fin)
+    
+    if franja is None:
+        print("\nNo hay franjas con datos en ese rango de fechas.")
+        return None
+    
+    print("\nTiempo de ejecución: " + str(tiempo_ms) + " [ms]." +
+        "\nFiltro aplicado: " + str(filtro_usado) +
+        "\nCantidad de trayectos en el rango de fechas: " + str(total_trayectos_en_rango))
+
+    print("\nFranja horaria seleccionada: " + str(franja) +
+        "\n\t- Costo promedio [USD]: " + str(costo_promedio) +
+        "\n\t- Número de trayectos: " + str(num_trayectos_franja) +
+        "\n\t- Duración promedio [min]: " + str(duracion_promedio_min) +
+        "\n\t- Pasajeros promedio: " + str(pasajeros_promedio) +
+        "\n\t- Costo total máximo en la franja [USD]: " + str(costo_max_franja) +
+        "\n\t- Costo total mínimo en la franja [USD]: " + str(costo_min_franja))
     return None
+
 
 
 def print_req_6(control):
