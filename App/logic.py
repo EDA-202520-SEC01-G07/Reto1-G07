@@ -2,7 +2,7 @@ import time
 import csv
 csv.field_size_limit(2147483647)
 from DataStructures.List import array_list as lt
-import math
+import math as math
 
 def new_logic():
     """
@@ -397,21 +397,6 @@ def req_3(catalog, maximo, minimo):
     return round(tiempo,2), trayectos, round(duracion_prom,2), round(costo_prom,2), round(distancia_prom,2), round(peajes_prom,2), max_cpasajeros, round(propina_prom,4), fecha_frec
               
 
-def barrio_mas_cercano(lat, lon, barrios):
-    """
-    barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
-    """
-    barrio_cercano = None
-    distancia_min = 1000000000
-
-    for b in range(lt.size(barrios)):
-        b = lt.get_element(barrios, b)
-        d = haversine(lat, lon, b["latitude"], b["longitude"])
-        if d < distancia_min:
-            distancia_min = d
-            barrio_cercano = b["neighborhood"]
-
-    return barrio_cercano
 def req4(catalog, filtro, fecha_inicial, fecha_final):
     start=get_time()
     viajes = catalog["viajes"]
@@ -503,12 +488,47 @@ def req_5(catalog,costo_tipo, fecha_inicial, fecha_final):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(catalog):
+def req_6(catalog, barrio, fecha_i, fecha_f):
     """
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-    pass
+    start = get_time()
+    trayectos = 0
+    distancia = 0
+    tiempo = 0
+    size = lt.size(catalog)
+    for i in range(0, size):
+        viaje = lt.get_element(catalog["viajes"],i)
+        #Requerimiento de fecha
+        fecha = viaje["pickup_datetime"][:10]
+        if fecha >= fecha_i and fecha <= fecha_f:
+            i_latitud = viaje["pickup_latitude"]
+            i_longitud = viaje["pickup_longitude"]
+            barrio_salida = barrio_mas_cercano(i_latitud, i_longitud)
+            if barrio == barrio_salida:
+                trayectos += 1
+                distancia += viaje["trip_distance"]
+                #tiempo                
+                fech_ini = str(viaje["pickup_datetime"])
+                fech_fin = str(viaje["dropoff_datetime"])
+                hor_ini = fech_ini[11:]
+                x_ini = hor_ini.split(":")
+                Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
+                hor_fin = fech_fin[11:]
+                x_fin = hor_fin.split(":")
+                Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
+                if Dura_fin >= Dura_ini:
+                    Dura = Dura_fin - Dura_ini
+                else:
+                    Dura = (1440 - Dura_ini) + Dura_fin
+                
+                tiempo += Dura
+                
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, trayectos
 
 
 
@@ -536,3 +556,20 @@ def haversine(lat1, lon1, lat2, lon2):
     a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
     c = 2 * math.asin(math.sqrt(a))
     return R * c
+
+def barrio_mas_cercano(lat, lon):
+    """
+    barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
+    """
+    barrios = load_data_neigh()
+    barrio_cercano = None
+    distancia_min = 9999999999999999
+
+    for b in range(lt.size(barrios)):
+        b = lt.get_element(barrios, b)
+        d = haversine(lat, lon, b["latitude"], b["longitude"])
+        if d < distancia_min:
+            distancia_min = d
+            barrio_cercano = b["neighborhood"]
+
+    return barrio_cercano
