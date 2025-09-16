@@ -470,7 +470,7 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
         }
     else:
         return {"mensaje": "No hay trayectos en ese rango de fechas"}
-    
+
 
 def req_4(catalog):
     """
