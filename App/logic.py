@@ -26,7 +26,6 @@ def load_data_neigh():
             "longitude": float(barrio["longitude"].replace(",","."))
         }
         lt.add_last(barrios, barrio_limpio)   
-    
     return barrios
 
 # Funciones para la carga de datos
@@ -43,6 +42,10 @@ def load_data(catalog, filename):
     for viaje in input_file:
         viaje["id"]=id #El dictreader me da cada fila como un dict, 
                        #pongo una llave id para que sea fácil identificar cada viaje
+        viaje["pickup_date"]= viaje["pickup_datetime"][:10] #para obtener fácil la fecha inicio
+        viaje["pickup_time"]=viaje["pickup_datetime"][11:] #para obtener fácil la hora inicio
+        viaje["dropoff_date"]=viaje["dropoff_datetime"][:10] #para obtener fácil la fecha final
+        viaje["dropoff_time"]=viaje["dropoff_datetime"][11:] #para obtener fácil la hora final
         viaje["passenger_count"] = int(viaje["passenger_count"])
         viaje["trip_distance"] = float(viaje["trip_distance"])
         viaje["pickup_longitude"] = float(viaje["pickup_longitude"])
@@ -64,7 +67,7 @@ def load_data(catalog, filename):
     tiempo = delta_time(start, end)
     
     total = lt.size(catalog["viajes"])
-    menor = 1000000000
+    menor = 99999999999999
     mayor = 0.0
     for i in range(0, total):
         viaje = lt.get_element(catalog["viajes"], i)
@@ -84,24 +87,11 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
-        info = {
-            "Id_trayecto": viaje["id"],
+        duracion = diferencia_tiempo(viaje)
+        info = {"Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración en (m)": Dura,
+            "Duración en (m)": duracion,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         primeros.append(info)
@@ -109,25 +99,12 @@ def load_data(catalog, filename):
     ultimos = []
     for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
+        duracion = diferencia_tiempo(viaje)
         viaje = lt.get_element(catalog["viajes"], i)
-        info = {
-            "Id_trayecto": viaje["id"],
+        info = {"Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración en (min)": Dura,
+            "Duración en (min)": duracion,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
@@ -172,23 +149,11 @@ def req_1(catalog, pasajeros):
     tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
-        fech_ini= str(viaje["pickup_datetime"])
-        fech_fin= str(viaje["dropoff_datetime"])
-        hor_ini= fech_ini[11:]
-        x_ini= hor_ini.split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        hor_fin= fech_fin[11:]
-        x_fin= hor_fin.split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
+        dur = diferencia_tiempo(viaje)
         
         if viaje["passenger_count"] == int(pasajeros):
             trayectos += 1
-            duracion += Dura
+            duracion += dur
             costo_total += viaje["total_amount"]
             distancia += viaje["trip_distance"]
             peajes += viaje["tolls_amount"]
@@ -203,7 +168,7 @@ def req_1(catalog, pasajeros):
             elif viaje["payment_type"] == "UNKNOWN":
                 tipo_pago["UNKNOWN"]+=1
                 
-            fecha_i = str(viaje["pickup_datetime"])[:10]
+            fecha_i = viaje["pickup_date"]
             if fecha_i not in fechas:
                 fechas.append(fecha_i)
                 frecuencias_fechas.append(1)
@@ -265,23 +230,8 @@ def req_2(catalog, pago):
             filtro.append(viaje)
     
     for viaje in filtro:
-        fech_ini = str(viaje["pickup_datetime"])
-        fech_fin = str(viaje["dropoff_datetime"])
-
-        hor_ini = fech_ini[11:]
-        x_ini = hor_ini.split(":")
-        Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
-
-        hor_fin = fech_fin[11:]
-        x_fin = hor_fin.split(":")
-        Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
-
-        if Dura_fin >= Dura_ini:
-            Dura = Dura_fin - Dura_ini
-        else:
-            Dura = (1440 - Dura_ini) + Dura_fin
-
-        Duracion += Dura
+        dur = diferencia_tiempo(viaje)
+        Duracion += dur
         costo_total += viaje["total_amount"]
         distancia_total += viaje["trip_distance"]
         peajes_total += viaje["tolls_amount"]
@@ -292,7 +242,7 @@ def req_2(catalog, pago):
         else:
             pasajeros[viaje["passenger_count"]] = 1
 
-        fecha_fin = viaje["dropoff_datetime"][:10]
+        fecha_fin = viaje["dropoff_date"]
         if fecha_fin in fecha:
             fecha[fecha_fin] += 1
         else:
@@ -338,36 +288,22 @@ def req_3(catalog, maximo, minimo):
         viaje=lt.get_element(catalog["viajes"],i)
         if viaje["total_amount"]>=float(minimo) and viaje["total_amount"]<=float(maximo):
             trayectos+=1
-            fech_ini= str(viaje["pickup_datetime"])
-            fech_fin= str(viaje["dropoff_datetime"])
-            hor_ini= fech_ini[11:]
-            x_ini= hor_ini.split(":")
-            Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-            hor_fin= fech_fin[11:]
-            x_fin= hor_fin.split(":")
-            Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-            
-            if Dura_fin >= Dura_ini:  
-                Dura= Dura_fin - Dura_ini
-            else:  
-                Dura= (1440 - Dura_ini) + Dura_fin
-                
-            duracion+=Dura
+            dura = diferencia_tiempo(viaje)
+            duracion+=dura
             costo+=viaje["total_amount"]
             distancia+=viaje["trip_distance"]
             peajes+=viaje["tolls_amount"]
             propina+=viaje["tip_amount"]
-            
               
             if viaje["passenger_count"] in frecuencias_pasa:
                 frecuencias_pasa[viaje["passenger_count"]]+=1
             else:
                 frecuencias_pasa[viaje["passenger_count"]]=1
             
-            if fech_fin in frecuencias_fechas:
-                frecuencias_fechas[fech_fin]+=1
+            if viaje["dropoff_date"] in frecuencias_fechas:
+                frecuencias_fechas[viaje["dropoff_date"]]+=1
             else:
-                frecuencias_fechas[fech_fin]=1
+                frecuencias_fechas[viaje["dropoff_date"]]=1
             
     duracion_prom=duracion/trayectos
     costo_prom=costo/trayectos
@@ -390,10 +326,8 @@ def req_3(catalog, maximo, minimo):
         if frecuencias_fechas[key] > max_fech:
             max_fech = frecuencias_fechas[key]
             fecha_frec = key             
-        
     end=get_time()
     tiempo=delta_time(start,end)
-        
     return round(tiempo,2), trayectos, round(duracion_prom,2), round(costo_prom,2), round(distancia_prom,2), round(peajes_prom,2), max_cpasajeros, round(propina_prom,4), fecha_frec
               
 
@@ -407,7 +341,7 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
 
     for i in range(0, tamaño):   # índice base 0
         viaje = lt.get_element(viajes, i)
-        fecha = viaje["pickup_datetime"][:10]  # YYYY-MM-DD
+        fecha = viaje["pickup_date"]  # YYYY-MM-DD
 
         if fecha_inicial <= fecha <= fecha_final:
             origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
@@ -443,7 +377,6 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
                         "costo": viaje["total_amount"],
                         "conteo": 1
                     })
-
                 total_trayectos += 1
 
     # elegir mejor combinación
@@ -484,8 +417,8 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
     tamano= lt.size(catalog["viajes"])
 
     for i in range(0, tamano):
-        pickup_times=(str(viaje["pickup_datetime"]))[11:]
-        dropoff_times=(str(viaje["dropoff_datetime"]))[11:]
+        pickup_times=(str(viaje["pickup_time"]))
+        dropoff_times=(str(viaje["dropoff_time"]))
         pickup_time=pickup_times.replace(":","")
         dropoff_time=dropoff_times.replace(":","")
         viaje= lt.get_element(catalog["viajes"], i)
@@ -506,31 +439,20 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
-        fecha = viaje["pickup_datetime"][:10]
+        fecha = viaje["pickup_date"]
         if fecha >= fecha_i and fecha <= fecha_f:
-            punto1 = (viaje["pickup_latitude"], viaje["pickup_longitude"])
-            barrio_salida = barrio_mas_cercano(catalog, punto1)
+            lat = viaje["pickup_latitude"]
+            long = viaje["pickup_longitude"]
+            barrio_salida = barrio_mas_cercano(lat, long, catalog["barrios"])
             if barrio == barrio_salida:
                 trayectos += 1
                 distancia += viaje["trip_distance"]
-                #tiempo                
-                fech_ini = str(viaje["pickup_datetime"])
-                fech_fin = str(viaje["dropoff_datetime"])
-                hor_ini = fech_ini[11:]
-                x_ini = hor_ini.split(":")
-                Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
-                hor_fin = fech_fin[11:]
-                x_fin = hor_fin.split(":")
-                Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
-                if Dura_fin >= Dura_ini:
-                    Dura = Dura_fin - Dura_ini
-                else:
-                    Dura = (1440 - Dura_ini) + Dura_fin
-                tiempo += Dura
+                tmp= diferencia_tiempo(viaje)
+                tiempo += tmp
                 
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
-                barrio_destino = barrio_mas_cercano(catalog, f_latitud, f_longitud)
+                barrio_destino = barrio_mas_cercano(f_latitud, f_longitud, catalog["barrios"])
                 if barrio_destino not in b_fin:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
@@ -598,3 +520,15 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distancia = R * c
     return distancia
+
+def diferencia_tiempo(viaje):
+    #tiempo               
+    x_ini= viaje["pickup_time"].split(":")
+    Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
+    x_fin= viaje["dropoff_time"].split(":")
+    Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
+    if Dura_fin >= Dura_ini:
+        Dura = Dura_fin - Dura_ini
+    else:
+        Dura = (1440 - Dura_ini) + Dura_fin
+    return Dura
