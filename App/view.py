@@ -111,24 +111,32 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    print("\n=== Requerimiento 4: Combinación de barrios con mayor/menor costo promedio ===")
-
     filtro = input("Digite filtro (MAYOR/MENOR): ").strip().upper()
     fecha_ini = input("Digite fecha inicial (YYYY-MM-DD): ").strip()
     fecha_fin = input("Digite fecha final (YYYY-MM-DD): ").strip()
 
-    resultado = logic.req4(control, filtro, fecha_ini, fecha_fin)
+    tiempo, filtro, total, origen, destino, dist_prom, dur_prom, costo_prom = logic.req4(
+        control, filtro, fecha_ini, fecha_fin
+    )
 
-    if "mensaje" in resultado:
-        print("\n", resultado["mensaje"])
+    if total == 0:
+        print("\nNo se encontraron trayectos en el rango de fechas.")
     else:
-        print(f"\nFiltro aplicado: {resultado['filtro']}")
-        print(f"Total de trayectos analizados: {resultado['total_trayectos']}")
-        print(f"Barrio origen: {resultado['barrio_origen']}")
-        print(f"Barrio destino: {resultado['barrio_destino']}")
-        print(f"Distancia promedio: {resultado['distancia_promedio']:.2f} millas")
-        print(f"Duración promedio: {resultado['duracion_promedio']:.2f} minutos")
-        print(f"Costo promedio: ${resultado['costo_promedio']:.2f}")
+        data = [
+            ["Tiempo de consulta [ms]", str(round(tiempo, 2))],
+            ["Filtro aplicado", str(filtro)],
+            ["Total de trayectos en el rango de fechas", str(total)],
+            ["Barrio de origen", str(origen)],
+            ["Barrio de destino", str(destino)],
+            ["Distancia promedio de los trayectos [millas]", str(round(dist_prom, 2))],
+            ["Duración promedio de los trayectos [min]", str(round(dur_prom, 2))],
+            ["Costo promedio de los trayectos [USD]", str(round(costo_prom, 2))]
+        ]
+
+        print("\n=== Resultados del Requerimiento 4 ===")
+        print(tb.tabulate(data, headers=["Descripción", "Valor"]))
+        print("=======================================\n")
+
 
 def print_req_5(control):
     """

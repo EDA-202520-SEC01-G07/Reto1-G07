@@ -398,87 +398,79 @@ def req_3(catalog, maximo, minimo):
               
 
 def req4(catalog, filtro, fecha_inicial, fecha_final):
-    """
-    Retorna el resultado del requerimiento 4
-    """
-    # TODO: Modificar el requerimiento 4
-    start=get_time()
     start = get_time()
     viajes = catalog["viajes"]
     barrios = catalog["barrios"]
     tamaño = lt.size(viajes)
-    resultados = {}
+    resultados = []
     total_trayectos = 0
 
-    for i in range(0, tamaño):   # aquí sí desde 0 hasta tamaño-1
+    for i in range(0, tamaño):   # índice base 0
         viaje = lt.get_element(viajes, i)
         fecha = viaje["pickup_datetime"][:10]  # YYYY-MM-DD
 
-        # solo procesamos si está en rango
         if fecha_inicial <= fecha <= fecha_final:
-
             origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
             destino = barrio_mas_cercano(viaje["dropoff_latitude"], viaje["dropoff_longitude"], barrios)
 
-            # solo procesamos si origen y destino son distintos
             if origen != destino:
-
                 # calcular duración en minutos
                 ini = viaje["pickup_datetime"]
                 fin = viaje["dropoff_datetime"]
-                duracion = (int(fin[11:13])*60 + int(fin[14:16])) - (int(ini[11:13])*60 + int(ini[14:16]))
-                if duracion < 0:  # pasó de día
+                duracion = (int(fin[11:13]) * 60 + int(fin[14:16])) - (int(ini[11:13]) * 60 + int(ini[14:16]))
+                if duracion < 0:
                     duracion += 1440
 
-                clave = (origen, destino)
-                if clave not in resultados:
-                    resultados[clave] = {"distancia": 0, "duracion": 0, "costo": 0, "conteo": 0}
+                # buscar si ya existe combinación en resultados
+                encontrado = False
+                j = 0
+                while j < len(resultados):
+                    r = resultados[j]
+                    if r["origen"] == origen and r["destino"] == destino:
+                        r["distancia"] += viaje["trip_distance"]
+                        r["duracion"]  += duracion
+                        r["costo"]     += viaje["total_amount"]
+                        r["conteo"]    += 1
+                        encontrado = True
+                    j += 1
 
-                resultados[clave]["distancia"] += viaje["trip_distance"]
-                resultados[clave]["duracion"] += duracion
-                resultados[clave]["costo"] += viaje["total_amount"]
-                resultados[clave]["conteo"] += 1
+                if not encontrado:
+                    resultados.append({
+                        "origen": origen,
+                        "destino": destino,
+                        "distancia": viaje["trip_distance"],
+                        "duracion": duracion,
+                        "costo": viaje["total_amount"],
+                        "conteo": 1
+                    })
 
                 total_trayectos += 1
 
-    # elegir la mejor combinación
-    mejor_clave = None
+    # elegir mejor combinación
+    mejor = None
     mejor_valor = None
-
-    for clave, datos in resultados.items():
-        promedio_costo = datos["costo"] / datos["conteo"]
+    k = 0
+    while k < len(resultados):
+        r = resultados[k]
+        promedio_costo = r["costo"] / r["conteo"]
 
         if filtro == "MAYOR":
             if mejor_valor is None or promedio_costo > mejor_valor:
-                mejor_clave = clave
+                mejor = r
                 mejor_valor = promedio_costo
         else:  # MENOR
             if mejor_valor is None or promedio_costo < mejor_valor:
-                mejor_clave = clave
+                mejor = r
                 mejor_valor = promedio_costo
+        k += 1
 
     end = get_time()
     tiempo = delta_time(start, end)
 
-    if mejor_clave:
-        origen, destino = mejor_clave
-        datos = resultados[mejor_clave]
-        return {
-            "tiempo": tiempo,
-            "filtro": filtro,
-            "total_trayectos": total_trayectos,
-            "barrio_origen": origen,
-            "barrio_destino": destino,
-            "distancia_promedio": datos["distancia"] / datos["conteo"],
-            "duracion_promedio": datos["duracion"] / datos["conteo"],
-            "costo_promedio": datos["costo"] / datos["conteo"]
-        }
+    if mejor:
+        return (tiempo, filtro, total_trayectos, mejor["origen"], mejor["destino"], mejor["distancia"] / mejor["conteo"], mejor["duracion"] / mejor["conteo"], mejor["costo"] / mejor["conteo"])
     else:
-        return {"mensaje": "No hay trayectos en ese rango de fechas"}
-
-
-
-
+        return (tiempo, filtro, 0, None, None, 0, 0, 0)
 
 
 def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
@@ -577,11 +569,10 @@ def delta_time(start, end):
     return elapsed
 
 
-def barrio_mas_cercano(lat, lon, catalog):
+def barrio_mas_cercano(lat, lon, barrios):
     """
     barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
     """
-    barrios = catalog["barrios"]
     barrio_cercano = None
     distancia_min = 1000000000
     for i in range(lt.size(barrios)):
