@@ -577,7 +577,7 @@ def delta_time(start, end):
     return elapsed
 
 
-def barrio_mas_cercano(catalog, punto1):
+def barrio_mas_cercano(lat, lon, catalog):
     """
     barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
     """
