@@ -398,45 +398,43 @@ def req_3(catalog, maximo, minimo):
               
 
 def req4(catalog, filtro, fecha_inicial, fecha_final):
-    start=get_time()
+    start = get_time()
     viajes = catalog["viajes"]
     barrios = catalog["barrios"]
-    tamaño= lt.size(viajes)
+    tamaño = lt.size(viajes)
     resultados = {}
     total_trayectos = 0
 
-    for i in range(0, tamaño):
-        viaje = lt.get_element(viajes, i)   # ahora sí obtienes el diccionario
+    for i in range(0, tamaño):   # aquí sí desde 0 hasta tamaño-1
+        viaje = lt.get_element(viajes, i)
         fecha = viaje["pickup_datetime"][:10]  # YYYY-MM-DD
 
+        # solo procesamos si está en rango
+        if fecha_inicial <= fecha <= fecha_final:
 
+            origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
+            destino = barrio_mas_cercano(viaje["dropoff_latitude"], viaje["dropoff_longitude"], barrios)
 
-        if not (fecha_inicial <= fecha <= fecha_final):
-            continue
+            # solo procesamos si origen y destino son distintos
+            if origen != destino:
 
-        origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
-        destino = barrio_mas_cercano(viaje["dropoff_latitude"], viaje["dropoff_longitude"], barrios)
+                # calcular duración en minutos
+                ini = viaje["pickup_datetime"]
+                fin = viaje["dropoff_datetime"]
+                duracion = (int(fin[11:13])*60 + int(fin[14:16])) - (int(ini[11:13])*60 + int(ini[14:16]))
+                if duracion < 0:  # pasó de día
+                    duracion += 1440
 
-        if origen == destino:
-            continue
+                clave = (origen, destino)
+                if clave not in resultados:
+                    resultados[clave] = {"distancia": 0, "duracion": 0, "costo": 0, "conteo": 0}
 
-        # calcular duración en minutos
-        ini = viaje["pickup_datetime"]
-        fin = viaje["dropoff_datetime"]
-        duracion = (int(fin[11:13])*60 + int(fin[14:16])) - (int(ini[11:13])*60 + int(ini[14:16]))
-        if duracion < 0:  # pasó de día
-            duracion += 1440
+                resultados[clave]["distancia"] += viaje["trip_distance"]
+                resultados[clave]["duracion"] += duracion
+                resultados[clave]["costo"] += viaje["total_amount"]
+                resultados[clave]["conteo"] += 1
 
-        clave = (origen, destino)
-        if clave not in resultados:
-            resultados[clave] = {"distancia": 0, "duracion": 0, "costo": 0, "conteo": 0}
-
-        resultados[clave]["distancia"] += viaje["trip_distance"]
-        resultados[clave]["duracion"] += duracion
-        resultados[clave]["costo"] += viaje["total_amount"]
-        resultados[clave]["conteo"] += 1
-
-        total_trayectos += 1
+                total_trayectos += 1
 
     # elegir la mejor combinación
     mejor_clave = None
@@ -453,13 +451,15 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
             if mejor_valor is None or promedio_costo < mejor_valor:
                 mejor_clave = clave
                 mejor_valor = promedio_costo
-    end=get_time()
-    tiempo=delta_time(start,end)
+
+    end = get_time()
+    tiempo = delta_time(start, end)
+
     if mejor_clave:
         origen, destino = mejor_clave
         datos = resultados[mejor_clave]
         return {
-            "tiempo": round(tiempo,2),
+            "tiempo": tiempo,
             "filtro": filtro,
             "total_trayectos": total_trayectos,
             "barrio_origen": origen,
@@ -470,6 +470,7 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
         }
     else:
         return {"mensaje": "No hay trayectos en ese rango de fechas"}
+
 
 
 
@@ -491,9 +492,6 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
         pickup_time=pickup_times.replace(":","")
         dropoff_time=dropoff_times.replace(":","")
         viaje= lt.get_element(catalog["viajes"], i)
-        if viaje["pickup_datetime"] >= fecha_menor and viaje["pickup_datetime"] <= fecha_mayor:
-            
-            
     pass
 
 def req_6(catalog):
@@ -581,12 +579,12 @@ def barrio_mas_cercano(lat, lon, barrios):
     """
     barrio_cercano = None
     distancia_min = 1000000000
-    for i in range(1, lt.size(barrios) + 1):
+    for i in range(lt.size(barrios)):
         b = lt.get_element(barrios, i)
         d = haversine(lat, lon, b["latitude"], b["longitude"])
         if d < distancia_min:
             distancia_min = d
-            barrio_cercano = b["neighborhood"]   # o podrías devolver también borough
+            barrio_cercano = b["neighborhood"]   # o podria devolver también borough?
     
     return barrio_cercano
 # Función auxiliar para calcular la distancia entre dos puntos geográficos sacada con IA.
