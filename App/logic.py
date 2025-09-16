@@ -453,7 +453,7 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
                 barrio_destino = barrio_mas_cercano(f_latitud, f_longitud, catalog["barrios"])
-                if barrio_destino not in b_fin:
+                if barrio_destino not in b_fin and barrio_destino != barrio:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
                 else:
@@ -507,7 +507,7 @@ def barrio_mas_cercano(lat, lon, barrios):
     
     return barrio_cercano
 
-# Función auxiliar para calcular la distancia entre dos puntos geográficos hechaq con ayuda de una IA.
+# Función auxiliar para calcular la distancia entre dos puntos geográficos hecha con ayuda de una IA.
 def haversine(lat1, lon1, lat2, lon2):
     """
     Calcula la distancia entre dos puntos (lat1, lon1) y (lat2, lon2)
