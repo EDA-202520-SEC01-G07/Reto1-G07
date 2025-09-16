@@ -418,9 +418,10 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
 
         if not (fecha_inicial <= fecha <= fecha_final):
             continue
-
-        origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
-        destino = barrio_mas_cercano(viaje["dropoff_latitude"], viaje["dropoff_longitude"], barrios)
+        punto_o = (viaje["pickup_latitude"], viaje["pickup_longitude"])
+        punto_d = (viaje["dropoff_latitude"], viaje["dropoff_longitude"])
+        origen = barrio_mas_cercano(catalog, punto_o)
+        destino = barrio_mas_cercano(catalog, punto_d)
 
         if origen == destino:
             continue
@@ -498,7 +499,7 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
             
     pass
 
-def req_6(catalog):
+def req_6(catalog, barrio, fecha_i, fecha_f):
     """
     Retorna el resultado del requerimiento 6
     """
@@ -515,9 +516,8 @@ def req_6(catalog):
         #Requerimiento de fecha
         fecha = viaje["pickup_datetime"][:10]
         if fecha >= fecha_i and fecha <= fecha_f:
-            i_latitud = viaje["pickup_latitude"]
-            i_longitud = viaje["pickup_longitude"]
-            barrio_salida = barrio_mas_cercano(i_latitud, i_longitud)
+            punto1 = (viaje["pickup_latitude"], viaje["pickup_longitude"])
+            barrio_salida = barrio_mas_cercano(catalog, punto1)
             if barrio == barrio_salida:
                 trayectos += 1
                 distancia += viaje["trip_distance"]
@@ -538,7 +538,7 @@ def req_6(catalog):
                 
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
-                barrio_destino = barrio_mas_cercano(f_latitud, f_longitud)
+                barrio_destino = barrio_mas_cercano(catalog, f_latitud, f_longitud)
                 if barrio_destino not in b_fin:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
@@ -577,11 +577,11 @@ def delta_time(start, end):
     return elapsed
 
 
-def barrio_mas_cercano(lat, lon):
+def barrio_mas_cercano(catalog, punto1):
     """
     barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
     """
-    barrios = load_data_neigh()
+    barrios = catalog["barrios"]
     barrio_cercano = None
     distancia_min = 1000000000
     for i in range(1, lt.size(barrios) + 1):
@@ -589,11 +589,9 @@ def barrio_mas_cercano(lat, lon):
 
     for b in range(lt.size(barrios)):
         b = lt.get_element(barrios, b)
-        punto1 = (lat, lon)
         punto2 = (b["latitude"], b["longitude"])
         d = hav.haversine(punto1, punto2, unit= "mi")
         if d < distancia_min:
             distancia_min = d
-            barrio_cercano = b["neighborhood"]   # o podrías devolver también borough
-    
+            barrio_cercano = b["neighborhood"]
     return barrio_cercano
