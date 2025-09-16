@@ -398,6 +398,11 @@ def req_3(catalog, maximo, minimo):
               
 
 def req4(catalog, filtro, fecha_inicial, fecha_final):
+    """
+    Retorna el resultado del requerimiento 4
+    """
+    # TODO: Modificar el requerimiento 4
+    start=get_time()
     start = get_time()
     viajes = catalog["viajes"]
     barrios = catalog["barrios"]
@@ -494,7 +499,7 @@ def req_5(catalog,costo_tipo, fecha_menor, fecha_mayor):
         viaje= lt.get_element(catalog["viajes"], i)
     pass
 
-def req_6(catalog):
+def req_6(catalog, barrio, fecha_i, fecha_f):
     """
     Retorna el resultado del requerimiento 6
     """
@@ -503,15 +508,16 @@ def req_6(catalog):
     trayectos = 0
     distancia = 0
     tiempo = 0
-    size = lt.size(catalog)
+    b_fin = []
+    frecuencias = []
+    size = lt.size(catalog["viajes"])
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
         fecha = viaje["pickup_datetime"][:10]
         if fecha >= fecha_i and fecha <= fecha_f:
-            i_latitud = viaje["pickup_latitude"]
-            i_longitud = viaje["pickup_longitude"]
-            barrio_salida = barrio_mas_cercano(i_latitud, i_longitud)
+            punto1 = (viaje["pickup_latitude"], viaje["pickup_longitude"])
+            barrio_salida = barrio_mas_cercano(catalog, punto1)
             if barrio == barrio_salida:
                 trayectos += 1
                 distancia += viaje["trip_distance"]
@@ -532,14 +538,12 @@ def req_6(catalog):
                 
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
-                barrio_destino = barrio_mas_cercano(f_latitud, f_longitud)
-                b_fin = []
-                frecuencias = []
+                barrio_destino = barrio_mas_cercano(catalog, f_latitud, f_longitud)
                 if barrio_destino not in b_fin:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
                 else:
-                    ind = b_fin(barrio_destino)
+                    ind = b_fin.index(barrio_destino)
                     frecuencias[ind] += 1
                     
     # barrio destino más repetido           
@@ -571,39 +575,21 @@ def delta_time(start, end):
     """
     elapsed = float(end - start)
     return elapsed
-def barrio_mas_cercano(lat, lon, barrios):
+
+
+def barrio_mas_cercano(catalog, punto1):
     """
-    Encuentra el barrio más cercano a una coordenada (lat, lon).
-    barrios: lista con dicts que tienen las llaves
-             "borough", "neighborhood", "latitude", "longitude"
+    barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
     """
+    barrios = catalog["barrios"]
     barrio_cercano = None
     distancia_min = 1000000000
     for i in range(lt.size(barrios)):
         b = lt.get_element(barrios, i)
+
         d = haversine(lat, lon, b["latitude"], b["longitude"])
         if d < distancia_min:
             distancia_min = d
-            barrio_cercano = b["neighborhood"]   # o podria devolver también borough?
+            barrio_cercano = b["neighborhood"]   # o podrías devolver también borough
     
     return barrio_cercano
-# Función auxiliar para calcular la distancia entre dos puntos geográficos sacada con IA.
-def haversine(lat1, lon1, lat2, lon2):
-    """
-    Calcula la distancia en millas entre dos puntos (lat1, lon1) y (lat2, lon2)
-    usando la fórmula de Haversine.
-    """
-    R = 3958.8  # Radio de la Tierra en millas
-
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lon2 - lon1)
-
-    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distancia = R * c
-    return distancia
-
-
