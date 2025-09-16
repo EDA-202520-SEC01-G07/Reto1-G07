@@ -89,20 +89,12 @@ def load_data(catalog, filename):
     primeros = []
     for i in range (0,5):
         viaje = lt.get_element(catalog["viajes"], i)
-        x_ini= viaje["pickup_time"].split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        x_fin= viaje["dropoff_time"].split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
+        duracion = tiempo(viaje)
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración en (m)": Dura,
+            "Duración en (m)": duracion,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         primeros.append(info)
@@ -110,21 +102,13 @@ def load_data(catalog, filename):
     ultimos = []
     for i in range (total-5, total):
         viaje = lt.get_element(catalog["viajes"], i)
-        x_ini= viaje["pickup_time"].split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        x_fin= viaje["dropoff_time"].split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
+        duracion = tiempo(viaje)
         viaje = lt.get_element(catalog["viajes"], i)
         info = {
             "Id_trayecto": viaje["id"],
             "Fecha/Hora inicio": viaje["pickup_datetime"],
             "Fecha/Hora destino": viaje["dropoff_datetime"],
-            "Duración en (min)": Dura,
+            "Duración en (min)": duracion,
             "Distancia": viaje["trip_distance"],
             "Costo_total": viaje["total_amount"]}
         ultimos.append(info)
@@ -169,19 +153,10 @@ def req_1(catalog, pasajeros):
     tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
         viaje = lt.get_element(catalog["viajes"],i)
-        x_ini= viaje["pickup_time"].split(":")
-        Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-        x_fin= viaje["dropoff_time"].split(":")
-        Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:  
-            Dura= Dura_fin - Dura_ini
-        else:  
-            # asumimos que solo pasa al día siguiente
-            Dura= (1440 - Dura_ini) + Dura_fin
-        
+        dur = tiempo(viaje)
         if viaje["passenger_count"] == int(pasajeros):
             trayectos += 1
-            duracion += Dura
+            duracion += dur
             costo_total += viaje["total_amount"]
             distancia += viaje["trip_distance"]
             peajes += viaje["tolls_amount"]
@@ -258,17 +233,8 @@ def req_2(catalog, pago):
             filtro.append(viaje)
     
     for viaje in filtro:
-        x_ini= viaje["pickup_time"].split(":")
-        Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
-
-        x_fin= viaje["dropoff_time"].split(":")
-        Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
-        if Dura_fin >= Dura_ini:
-            Dura = Dura_fin - Dura_ini
-        else:
-            Dura = (1440 - Dura_ini) + Dura_fin
-
-        Duracion += Dura
+        dur = tiempo(viaje)
+        Duracion += dur
         costo_total += viaje["total_amount"]
         distancia_total += viaje["trip_distance"]
         peajes_total += viaje["tolls_amount"]
@@ -325,23 +291,13 @@ def req_3(catalog, maximo, minimo):
         viaje=lt.get_element(catalog["viajes"],i)
         if viaje["total_amount"]>=float(minimo) and viaje["total_amount"]<=float(maximo):
             trayectos+=1
-            x_ini= viaje["pickup_time"].split(":")
-            Dura_ini= int(x_ini[0])*60 + int(x_ini[1])
-            x_fin= viaje["dropoff_time"].split(":")
-            Dura_fin= int(x_fin[0])*60 + int(x_fin[1])
-            
-            if Dura_fin >= Dura_ini:  
-                Dura= Dura_fin - Dura_ini
-            else:  
-                Dura= (1440 - Dura_ini) + Dura_fin
-                
-            duracion+=Dura
+            dura = tiempo(viaje)
+            duracion+=dura
             costo+=viaje["total_amount"]
             distancia+=viaje["trip_distance"]
             peajes+=viaje["tolls_amount"]
             propina+=viaje["tip_amount"]
             
-              
             if viaje["passenger_count"] in frecuencias_pasa:
                 frecuencias_pasa[viaje["passenger_count"]]+=1
             else:
@@ -502,18 +458,9 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
             barrio_salida = barrio_mas_cercano(catalog, punto1)
             if barrio == barrio_salida:
                 trayectos += 1
-                distancia += viaje["trip_distance"]
-                #tiempo                
-                x_ini= viaje["pickup_time"].split(":")
-                Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
-                x_fin= viaje["dropoff_time"].split(":")
-                Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
-                if Dura_fin >= Dura_ini:
-                    Dura = Dura_fin - Dura_ini
-                else:
-                    Dura = (1440 - Dura_ini) + Dura_fin
-                tiempo += Dura
-                
+                distancia += viaje["trip_distance"]              
+                tiempo = tiempo(viaje)
+
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
                 barrio_destino = barrio_mas_cercano(catalog, f_latitud, f_longitud)
@@ -554,7 +501,7 @@ def delta_time(start, end):
     elapsed = float(end - start)
     return elapsed
 
-
+# Funciones auxiliares
 def barrio_mas_cercano(catalog, punto1):
     """
     barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
@@ -573,3 +520,15 @@ def barrio_mas_cercano(catalog, punto1):
             distancia_min = d
             barrio_cercano = b["neighborhood"]
     return barrio_cercano
+
+def tiempo(viaje):
+    #tiempo               
+    x_ini= viaje["pickup_time"].split(":")
+    Dura_ini = int(x_ini[0]) * 60 + int(x_ini[1])
+    x_fin= viaje["dropoff_time"].split(":")
+    Dura_fin = int(x_fin[0]) * 60 + int(x_fin[1])
+    if Dura_fin >= Dura_ini:
+        Dura = Dura_fin - Dura_ini
+    else:
+        Dura = (1440 - Dura_ini) + Dura_fin
+    return Dura
