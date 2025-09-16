@@ -522,13 +522,31 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                     Dura = Dura_fin - Dura_ini
                 else:
                     Dura = (1440 - Dura_ini) + Dura_fin
-                
                 tiempo += Dura
                 
+                f_latitud = viaje["dropoff_latitude"]
+                f_longitud = viaje["dropoff_longitude"]
+                barrio_destino = barrio_mas_cercano(f_latitud, f_longitud)
+                b_fin = []
+                frecuencias = []
+                if barrio_destino not in b_fin:
+                    b_fin.append(barrio_destino)
+                    frecuencias.append(1)
+                else:
+                    ind = b_fin(barrio_destino)
+                    frecuencias[ind] += 1
+                    
+    # barrio destino más repetido           
+    frecuencia = max(frecuencias)
+    barr = frecuencias.index(frecuencia)
+    destino_repetido = b_fin[barr]
+            
+    distancia_prom = distancia/trayectos
+    tiempo_prom = tiempo/trayectos
     
     end = get_time()
-    tiempo = delta_time(start, end)
-    return tiempo, trayectos
+    t = delta_time(start, end)
+    return t, trayectos, distancia_prom, tiempo_prom, destino_repetido
 
 
 

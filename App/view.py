@@ -29,7 +29,7 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    filename = input('Diga el archivo que quiere evaluar (small, medium, large)\n')
+    filename = input('Diga el archivo que quiere evaluar (small, medium, large)\n').strip()
     filename = "data/taxis-"+filename+".csv"
     tiempo, total, menorid, fecha_menor, costo_menor, mayorid, fecha_mayor, costo_mayor, primeros, ultimos = logic.load_data(control, filename)
     print("\nTiempo de carga: "+str(tiempo)+" [ms].\
@@ -53,7 +53,7 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pas = input("Indique la cantidad de pasajeros: ")
+    pas = input("Indique la cantidad de pasajeros: ").strip()
     tiempo, trayectos, duracion_prom, costo_prom, distancia_prom, peajes_prom, pago_mas_usado, propina_prom, fecha_repetida, frecuencia = logic.req_1(control, pas)
     print("\nTiempo de ejecución: "+str(tiempo)+" [ms].\
         \nCantidad de trayectos con "+str(pas)+" pasajeros: "+str(trayectos)+"\
@@ -69,7 +69,7 @@ def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
-    pago = input("Indique el tipo de pago que desea consultar (CREDIT_CARD, CASH, NO_CHARGE, UNKNOWN): ")
+    pago = input("Indique el tipo de pago que desea consultar (CREDIT_CARD, CASH, NO_CHARGE, UNKNOWN): ").strip().upper()
     tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_2(control, pago)
 
     data = [
@@ -92,8 +92,8 @@ def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
-    menor= input("Indique el valor menor del precio total pagado: ")
-    mayor= input("Indique el valor mayor del precio total pagado: ")
+    menor= input("Indique el valor menor del precio total pagado: ").strip()
+    mayor= input("Indique el valor mayor del precio total pagado: ").strip()
     tiempo, contador, duracion, costo, distancia_total, peajes_total, cantidad_pasa, propina, fecha_mayor = logic.req_3(control, mayor, menor)  
     print("\nTiempo de ejecución: "+str(tiempo)+" [ms].\
         \nCantidad de trayectos con precio total pagado entre "+str(menor)+" y "+str(mayor)+": "+str(contador)+"\
@@ -143,7 +143,17 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    return None
+    barrio = input("Indique qué barrio quiere evaluar: ").strip()
+    fecha_i = input("Digite fecha inicial (YYYY-MM-DD): ").strip()
+    fecha_f = input("Digite fecha final (YYYY-MM-DD): ").strip()
+    t, trayectos, distancia_prom, tiempo_prom, destino_repetido = logic.req_6(control, barrio, fecha_i,fecha_f)
+    print(
+        "\nTiempo de ejecución: "+str(t)+" [ms].\
+        \nCantidad de trayectos hechos en el rango de fechas y desde el barrio dado: "+str(trayectos)+"\
+        \nDistancia promedio [millas] de los trayectos: "+str(distancia_prom)+"\
+        \nTiempo promedio [min] de los trayectos: "+str(tiempo_prom)+"\
+        \n\nBarrio más visitado como destino de los trayectos: "+str(destino_repetido))
+    ### FALTAN MEDIOS DE PAGO
 
 
 
