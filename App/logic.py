@@ -9,8 +9,10 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos
-    catalog = {"viajes": None}
+    catalog = {"viajes": None, 
+               "barrios": None}
     catalog["viajes"] = lt.new_list()
+    catalog["barrios"] = load_data_neigh()
     return catalog
 
 
@@ -384,10 +386,106 @@ def req_3(catalog, maximo, minimo):
 #Función auxiliar apara cargar datos del nyc-neighborhoods.csv
 def load_data_neigh():       
     barrios = lt.new_list()
-    input_file = csv.DictReader(open("data/nyc-neighborhoods.csv", encoding='utf-8'))
+    input_file = csv.DictReader(open("data/nyc-neighborhoods.csv", encoding='utf-8'), delimiter=";")
     for barrio in input_file:
-        lt.add_last(barrios, barrio)   
+        barrio_limpio = {
+            "borough": barrio["borough"].strip(),
+            "neighborhood": barrio["neighborhood"].strip(),
+            "latitude": float(barrio["latitude"].replace(",",".")),
+            "longitude": float(barrio["longitude"].replace(",","."))
+        }
+        lt.add_last(barrios, barrio_limpio)   
+    
     return barrios
+def barrio_mas_cercano(lat, lon, barrios):
+    """
+    barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
+    """
+    barrio_cercano = None
+    distancia_min = 1000000000
+
+    for b in range(lt.size(barrios)):
+        b = lt.get_element(barrios, b)
+        d = haversine(lat, lon, b["latitude"], b["longitude"])
+        if d < distancia_min:
+            distancia_min = d
+            barrio_cercano = b["neighborhood"]
+
+    return barrio_cercano
+def req4(catalog, filtro, fecha_inicial, fecha_final):
+    start=get_time()
+    viajes = catalog["viajes"]
+    barrios = catalog["barrios"]
+    tamaño= lt.size(viajes)
+    resultados = {}
+    total_trayectos = 0
+
+    for i in range(0, tamaño):
+        viaje = lt.get_element(viajes, i)   # ahora sí obtienes el diccionario
+        fecha = viaje["pickup_datetime"][:10]  # YYYY-MM-DD
+
+
+
+        if not (fecha_inicial <= fecha <= fecha_final):
+            continue
+
+        origen = barrio_mas_cercano(viaje["pickup_latitude"], viaje["pickup_longitude"], barrios)
+        destino = barrio_mas_cercano(viaje["dropoff_latitude"], viaje["dropoff_longitude"], barrios)
+
+        if origen == destino:
+            continue
+
+        # calcular duración en minutos
+        ini = viaje["pickup_datetime"]
+        fin = viaje["dropoff_datetime"]
+        duracion = (int(fin[11:13])*60 + int(fin[14:16])) - (int(ini[11:13])*60 + int(ini[14:16]))
+        if duracion < 0:  # pasó de día
+            duracion += 1440
+
+        clave = (origen, destino)
+        if clave not in resultados:
+            resultados[clave] = {"distancia": 0, "duracion": 0, "costo": 0, "conteo": 0}
+
+        resultados[clave]["distancia"] += viaje["trip_distance"]
+        resultados[clave]["duracion"] += duracion
+        resultados[clave]["costo"] += viaje["total_amount"]
+        resultados[clave]["conteo"] += 1
+
+        total_trayectos += 1
+
+    # elegir la mejor combinación
+    mejor_clave = None
+    mejor_valor = None
+
+    for clave, datos in resultados.items():
+        promedio_costo = datos["costo"] / datos["conteo"]
+
+        if filtro == "MAYOR":
+            if mejor_valor is None or promedio_costo > mejor_valor:
+                mejor_clave = clave
+                mejor_valor = promedio_costo
+        else:  # MENOR
+            if mejor_valor is None or promedio_costo < mejor_valor:
+                mejor_clave = clave
+                mejor_valor = promedio_costo
+    end=get_time()
+    tiempo=delta_time(start,end)
+    if mejor_clave:
+        origen, destino = mejor_clave
+        datos = resultados[mejor_clave]
+        return {
+            "tiempo": round(tiempo,2),
+            "filtro": filtro,
+            "total_trayectos": total_trayectos,
+            "barrio_origen": origen,
+            "barrio_destino": destino,
+            "distancia_promedio": datos["distancia"] / datos["conteo"],
+            "duracion_promedio": datos["duracion"] / datos["conteo"],
+            "costo_promedio": datos["costo"] / datos["conteo"]
+        }
+    else:
+        return {"mensaje": "No hay trayectos en ese rango de fechas"}
+    
 
 def req_4(catalog):
     """

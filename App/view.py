@@ -111,8 +111,24 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
-    return None
+    print("\n=== Requerimiento 4: Combinación de barrios con mayor/menor costo promedio ===")
+
+    filtro = input("Digite filtro (MAYOR/MENOR): ").strip().upper()
+    fecha_ini = input("Digite fecha inicial (YYYY-MM-DD): ").strip()
+    fecha_fin = input("Digite fecha final (YYYY-MM-DD): ").strip()
+
+    resultado = logic.req4(control, filtro, fecha_ini, fecha_fin)
+
+    if "mensaje" in resultado:
+        print("\n", resultado["mensaje"])
+    else:
+        print(f"\nFiltro aplicado: {resultado['filtro']}")
+        print(f"Total de trayectos analizados: {resultado['total_trayectos']}")
+        print(f"Barrio origen: {resultado['barrio_origen']}")
+        print(f"Barrio destino: {resultado['barrio_destino']}")
+        print(f"Distancia promedio: {resultado['distancia_promedio']:.2f} millas")
+        print(f"Duración promedio: {resultado['duracion_promedio']:.2f} minutos")
+        print(f"Costo promedio: ${resultado['costo_promedio']:.2f}")
 
 def print_req_5(control):
     """
