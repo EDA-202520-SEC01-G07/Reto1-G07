@@ -14,7 +14,20 @@ def new_logic():
     catalog["viajes"] = lt.new_list()
     catalog["barrios"] = load_data_neigh()
     return catalog
-
+#Función auxiliar apara cargar datos del nyc-neighborhoods.csv
+def load_data_neigh():       
+    barrios = lt.new_list()
+    input_file = csv.DictReader(open("data/nyc-neighborhoods.csv", encoding='utf-8'), delimiter=";")
+    for barrio in input_file:
+        barrio_limpio = {
+            "borough": barrio["borough"].strip(),
+            "neighborhood": barrio["neighborhood"].strip(),
+            "latitude": float(barrio["latitude"].replace(",",".")),
+            "longitude": float(barrio["longitude"].replace(",","."))
+        }
+        lt.add_last(barrios, barrio_limpio)   
+    
+    return barrios
 
 # Funciones para la carga de datos
 def load_data(catalog, filename):
@@ -383,20 +396,7 @@ def req_3(catalog, maximo, minimo):
         
     return round(tiempo,2), trayectos, round(duracion_prom,2), round(costo_prom,2), round(distancia_prom,2), round(peajes_prom,2), max_cpasajeros, round(propina_prom,4), fecha_frec
               
-#Función auxiliar apara cargar datos del nyc-neighborhoods.csv
-def load_data_neigh():       
-    barrios = lt.new_list()
-    input_file = csv.DictReader(open("data/nyc-neighborhoods.csv", encoding='utf-8'), delimiter=";")
-    for barrio in input_file:
-        barrio_limpio = {
-            "borough": barrio["borough"].strip(),
-            "neighborhood": barrio["neighborhood"].strip(),
-            "latitude": float(barrio["latitude"].replace(",",".")),
-            "longitude": float(barrio["longitude"].replace(",","."))
-        }
-        lt.add_last(barrios, barrio_limpio)   
-    
-    return barrios
+
 def barrio_mas_cercano(lat, lon, barrios):
     """
     barrios: lista/dict con centroides { "neighborhood": str, "latitude": float, "longitude": float }
