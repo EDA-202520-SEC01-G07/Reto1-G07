@@ -3,6 +3,7 @@ import csv
 csv.field_size_limit(2147483647)
 from DataStructures.List import array_list as lt
 import math as math
+import haversine as hav
 
 def new_logic():
     """
@@ -398,6 +399,10 @@ def req_3(catalog, maximo, minimo):
               
 
 def req4(catalog, filtro, fecha_inicial, fecha_final):
+    """
+    Retorna el resultado del requerimiento 4
+    """
+    # TODO: Modificar el requerimiento 4
     start=get_time()
     viajes = catalog["viajes"]
     barrios = catalog["barrios"]
@@ -472,15 +477,6 @@ def req4(catalog, filtro, fecha_inicial, fecha_final):
         return {"mensaje": "No hay trayectos en ese rango de fechas"}
     
 
-def req_4(catalog):
-    """
-    Retorna el resultado del requerimiento 4
-    """
-    # TODO: Modificar el requerimiento 4
-    pass
-
-
-
 def req_5(catalog,costo_tipo, fecha_inicial, fecha_final):
     """
     Retorna el resultado del requerimiento 5
@@ -497,7 +493,9 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     trayectos = 0
     distancia = 0
     tiempo = 0
-    size = lt.size(catalog)
+    b_fin = []
+    frecuencias = []
+    size = lt.size(catalog["viajes"])
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
@@ -527,13 +525,11 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
                 barrio_destino = barrio_mas_cercano(f_latitud, f_longitud)
-                b_fin = []
-                frecuencias = []
                 if barrio_destino not in b_fin:
                     b_fin.append(barrio_destino)
                     frecuencias.append(1)
                 else:
-                    ind = b_fin(barrio_destino)
+                    ind = b_fin.index(barrio_destino)
                     frecuencias[ind] += 1
                     
     # barrio destino más repetido           
@@ -566,14 +562,6 @@ def delta_time(start, end):
     elapsed = float(end - start)
     return elapsed
 
-def haversine(lat1, lon1, lat2, lon2):
-    R = 3959  # Radio de la Tierra en millas
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
-    c = 2 * math.asin(math.sqrt(a))
-    return R * c
 
 def barrio_mas_cercano(lat, lon):
     """
@@ -585,7 +573,9 @@ def barrio_mas_cercano(lat, lon):
 
     for b in range(lt.size(barrios)):
         b = lt.get_element(barrios, b)
-        d = haversine(lat, lon, b["latitude"], b["longitude"])
+        punto1 = (lat, lon)
+        punto2 = (b["latitude"], b["longitude"])
+        d = hav.haversine(punto1, punto2, unit= "mi")
         if d < distancia_min:
             distancia_min = d
             barrio_cercano = b["neighborhood"]
