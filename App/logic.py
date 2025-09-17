@@ -143,8 +143,7 @@ def req_1(catalog, pasajeros):
     peajes = 0
     propina = 0
     tipo_pago = {"CREDIT_CARD": 0, "CASH": 0, "NO_CHARGE": 0, "UNKNOWN": 0}
-    fechas = []
-    frecuencias_fechas = []
+    fechas = {"fechas": lt.new_list(), "frecuencia": lt.new_list()}
     
     tam = lt.size(catalog["viajes"])
     for i in range(0,tam):
@@ -167,14 +166,16 @@ def req_1(catalog, pasajeros):
                 tipo_pago["NO_CHARGE"]+=1
             elif viaje["payment_type"] == "UNKNOWN":
                 tipo_pago["UNKNOWN"]+=1
-                
+            
+            cmp_function = lt.default_function
             fecha_i = viaje["pickup_date"]
-            if fecha_i not in fechas:
-                fechas.append(fecha_i)
-                frecuencias_fechas.append(1)
-            else:
-                ind = fechas.index(fecha_i)
-                frecuencias_fechas[ind] += 1
+            ind = lt.is_present(fechas["fechas"],fecha_i, cmp_function)
+            if ind is None:
+                lt.add_last(fechas["fechas"], fecha_i)
+                lt.add_last(fechas["frecuencia"],1)
+            elif ind != None:
+                frec = lt.get_element(fechas["frecuencia"],ind)
+                lt.change_info(fechas["frecuencia"],ind,frec+1)
 
     duracion_prom = duracion/trayectos
     costo_prom = costo_total/trayectos
@@ -198,9 +199,13 @@ def req_1(catalog, pasajeros):
     pago_mas_usado = pago_mayor +" - "+str(mayor)
     
     # Encontrar el día más frecuente
-    frecuencia = max(frecuencias_fechas)
-    f = frecuencias_fechas.index(frecuencia)
-    fecha_repetida = fechas[f]
+    frecuencia = 0
+    fecha_repetida = ""
+    for i in range(0, lt.size(fechas["frecuencia"])):
+        elem = lt.get_element(fechas["frecuencia"], i)
+        if elem > frecuencia:
+            frecuencia = elem
+            fecha_repetida = lt.get_element(fechas["fechas"],i)
     
     end = get_time()  
     tiempo = delta_time(start, end)
