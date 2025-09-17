@@ -19,7 +19,8 @@ def is_present(my_list, element, cmp_function):
                 break
         if keyexit:
             return keypos
-    return -1
+    return None
+
 def add_first(array_list,element):
     array_list["elements"].insert(0,element)
     array_list["size"]+=1
@@ -96,3 +97,10 @@ def sub_list(array_list, start_index, num_elements):
         for i in range(start_index,end_index):
             add_last(newlist,array_list["elements"][i])
         return newlist
+
+def default_function(elemen_1, element_2):
+   if elemen_1 > element_2:
+      return 1
+   elif elemen_1 < element_2:
+      return -1
+   return 0

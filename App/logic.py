@@ -492,9 +492,10 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     trayectos = 0
     distancia = 0
     tiempo = 0
-    b_fin = []
-    frecuencias = []
+    b_fin = {"barrio": lt.new_list(), "frecuencia": lt.new_list()}
     size = lt.size(catalog["viajes"])
+    pagos = lt.new_list()
+    info_pagos = {}
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
@@ -512,17 +513,36 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 f_latitud = viaje["dropoff_latitude"]
                 f_longitud = viaje["dropoff_longitude"]
                 barrio_destino = barrio_mas_cercano(f_latitud, f_longitud, catalog["barrios"])
-                if barrio_destino not in b_fin and barrio_destino != barrio:
-                    b_fin.append(barrio_destino)
-                    frecuencias.append(1)
-                else:
-                    ind = b_fin.index(barrio_destino)
-                    frecuencias[ind] += 1
+                cmp_function = lt.default_function
+                ind = lt.is_present(b_fin["barrio"],barrio_destino, cmp_function)
+                if ind is None and barrio_destino != barrio:
+                    lt.add_last(b_fin["barrio"], barrio_destino)
+                    lt.add_last(b_fin["frecuencia"],1)
+                elif ind != None:
+                    frec = lt.get_element(b_fin["frecuencia"], ind)
+                    lt.change_info(b_fin["frecuencia"],ind,frec+1)
+                
+                #metodo pagos
+                tipo = viaje["payment_type"]
+                ind = lt.is_present(pagos, tipo, cmp_function) 
+                if ind is None:
+                    info_pagos = {tipo: {"Num tray": 1, "Precio":viaje["total_amount"], "Tiempo": tiempo}}
+                elif ind != None:
+                    info_pagos[tipo]["Num tray"] += 1
+                    info_pagos[tipo]["Precio"] += viaje["total_amount"]
+                    info_pagos[tipo]["Tiempo"] += tiempo
+                
+                    
+            
                     
     # barrio destino más repetido           
-    frecuencia = max(frecuencias)
-    barr = frecuencias.index(frecuencia)
-    destino_repetido = b_fin[barr]
+    frecuencia = 0
+    destino_repetido = ""
+    for i in range(0, lt.size(b_fin["frecuencia"])):
+        elem = lt.get_element(b_fin["frecuencia"], i)
+        if elem > frecuencia:
+            frecuencia = elem
+            destino_repetido = lt.get_element(b_fin["barrio"],i)
             
     distancia_prom = distancia/trayectos
     tiempo_prom = tiempo/trayectos
@@ -530,7 +550,6 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     end = get_time()
     t = delta_time(start, end)
     return t, trayectos, distancia_prom, tiempo_prom, destino_repetido
-
 
 
 # Funciones para medir tiempos de ejecucion

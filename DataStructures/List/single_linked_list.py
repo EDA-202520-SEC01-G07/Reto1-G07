@@ -27,7 +27,7 @@ def is_present(my_list, element, cmp_function):
             count += 1
 
     if not existe:
-        count = -1
+        count = None
     return count
 
     """
@@ -236,3 +236,10 @@ def sub_list(my_list, pos, num_elmts):
             s_list = add_last(s_list, nodo["info"])
             nodo=nodo["next"]
     return s_list
+
+def default_function(elemen_1, element_2):
+   if elemen_1 > element_2:
+      return 1
+   elif elemen_1 < element_2:
+      return -1
+   return 0
