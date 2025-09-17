@@ -605,7 +605,8 @@ def barrio_mas_cercano(lat, lon, barrios):
     
     return barrio_cercano
 
-# Función auxiliar para calcular la distancia entre dos puntos geográficos hecha con ayuda de una IA.
+# Función auxiliar para calcular la distancia entre dos puntos geográficos hecha con https://pypi.org/project/haversine/ y Gemini, quien nos ayudó a entender como se implementaba. 
+# No se pudo usar el import haversine ya que en 2 de nuestros computadores hubo un problema al instalarlo, por lo que lo hicimos con la fórmula.
 def haversine(lat1, lon1, lat2, lon2):
     """
     Calcula la distancia entre dos puntos (lat1, lon1) y (lat2, lon2)
