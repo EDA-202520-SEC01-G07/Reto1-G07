@@ -495,7 +495,7 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     b_fin = {"barrio": lt.new_list(), "frecuencia": lt.new_list()}
     size = lt.size(catalog["viajes"])
     pagos = lt.new_list()
-    info_pagos = {}
+    info_pagos = []
     for i in range(0, size):
         viaje = lt.get_element(catalog["viajes"],i)
         #Requerimiento de fecha
@@ -526,14 +526,13 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 tipo = viaje["payment_type"]
                 ind = lt.is_present(pagos, tipo, cmp_function) 
                 if ind is None:
-                    info_pagos = {tipo: {"Num tray": 1, "Precio":viaje["total_amount"], "Tiempo": tiempo}}
-                elif ind != None:
-                    info_pagos[tipo]["Num tray"] += 1
-                    info_pagos[tipo]["Precio"] += viaje["total_amount"]
-                    info_pagos[tipo]["Tiempo"] += tiempo
-                
+                    lt.add_last(pagos, tipo)
+                    info_pagos.append({"Tipo pago": tipo, "Num tray": 1, "Precio":viaje["total_amount"], "Tiempo": tiempo})
                     
-            
+                elif ind != None:
+                    info_pagos[ind]["Num tray"] += 1
+                    info_pagos[ind]["Precio"] += viaje["total_amount"]
+                    info_pagos[ind]["Tiempo"] += tiempo
                     
     # barrio destino más repetido           
     frecuencia = 0
@@ -547,9 +546,25 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
     distancia_prom = distancia/trayectos
     tiempo_prom = tiempo/trayectos
     
+    mayor1 = 0 #num trayectos
+    mayor2 = 0 #más recaudo
+    for i in range(0, lt.size(pagos)):
+        if mayor2 < info_pagos[i]["Precio"]:
+            mayor2 = info_pagos[i]["Precio"]
+            mayor_recaudo = i
+        if mayor1 < info_pagos[i]["Num tray"]:
+            mayor1 = info_pagos[i]["Num tray"]
+            mas_usado = i
+        
+        info_pagos[i]["Precio"] = info_pagos[i]["Precio"]/info_pagos[i]["Num tray"]
+        info_pagos[i]["Tiempo"] = info_pagos[i]["Tiempo"]/info_pagos[i]["Num tray"]
+    
+    info_pagos[mas_usado]["¿Más usado?"] = "Sí"
+    info_pagos[mayor_recaudo]["¿Mayor recaudo?"] = "Sí"
+        
     end = get_time()
     t = delta_time(start, end)
-    return t, trayectos, distancia_prom, tiempo_prom, destino_repetido
+    return t, trayectos, distancia_prom, tiempo_prom, destino_repetido, info_pagos
 
 
 # Funciones para medir tiempos de ejecucion

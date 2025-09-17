@@ -175,15 +175,14 @@ def print_req_6(control):
     barrio = input("Indique qué barrio quiere evaluar: ").strip()
     fecha_i = input("Digite fecha inicial (YYYY-MM-DD): ").strip()
     fecha_f = input("Digite fecha final (YYYY-MM-DD): ").strip()
-    t, trayectos, distancia_prom, tiempo_prom, destino_repetido = logic.req_6(control, barrio, fecha_i,fecha_f)
+    t, trayectos, distancia_prom, tiempo_prom, destino_repetido, info_pagos = logic.req_6(control, barrio, fecha_i,fecha_f)
     print(
         "\nTiempo de ejecución: "+str(t)+" [ms].\
         \nCantidad de trayectos hechos en el rango de fechas y desde el barrio dado: "+str(trayectos)+"\
         \nDistancia promedio [millas] de los trayectos: "+str(distancia_prom)+"\
         \nTiempo promedio [min] de los trayectos: "+str(tiempo_prom)+"\
-        \n\nBarrio más visitado como destino de los trayectos: "+str(destino_repetido))
-    ### FALTAN MEDIOS DE PAGO
-
+        \n\nBarrio más visitado como destino de los trayectos: "+str(destino_repetido)+" \
+        \n\nDatos para cada medio de pago:\n"+tb.tabulate(info_pagos, headers="keys",tablefmt="simple")+"\n\n")
 
 
 # Se crea la lógica asociado a la vista
