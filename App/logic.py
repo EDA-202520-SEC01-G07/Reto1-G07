@@ -537,7 +537,7 @@ def req_6(catalog, barrio, fecha_i, fecha_f):
                 elif ind != None:
                     info_pagos[ind]["Num tray"] += 1
                     info_pagos[ind]["Precio"] += viaje["total_amount"]
-                    info_pagos[ind]["Tiempo"] += tiempo
+                    info_pagos[ind]["Tiempo"] += tmp
                     
     # barrio destino más repetido           
     frecuencia = 0
